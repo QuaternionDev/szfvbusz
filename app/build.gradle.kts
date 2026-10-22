@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -9,6 +11,20 @@ android {
     namespace = "hu.szfvbus"
     compileSdk = 35
     buildToolsVersion = "35.0.0"
+
+    // A kiadási kulcs adatai a repón kívül, a keystore.properties fájlban vannak.
+    val keystoreFile = rootProject.file("keystore.properties")
+    signingConfigs {
+        if (keystoreFile.exists()) {
+            val props = Properties().apply { keystoreFile.inputStream().use(::load) }
+            create("release") {
+                storeFile = file(props.getProperty("storeFile"))
+                storePassword = props.getProperty("storePassword")
+                keyAlias = props.getProperty("keyAlias")
+                keyPassword = props.getProperty("keyPassword")
+            }
+        }
+    }
 
     defaultConfig {
         applicationId = "hu.szfvbus"
@@ -23,8 +39,8 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            // Saját aláíró kulcs nélkül a debug kulccsal írjuk alá, hogy telepíthető legyen.
-            signingConfig = signingConfigs.getByName("debug")
+            // A kiadási kulccsal írjuk alá; ha nincs keystore.properties, a debug kulccsal.
+            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }
     }
 
