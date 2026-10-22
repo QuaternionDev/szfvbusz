@@ -8,11 +8,10 @@ Android alkalmazás Székesfehérvár helyi buszközlekedéséhez.
 > [szfvbuszapp@quaternion.hu](mailto:szfvbuszapp@quaternion.hu) címre.
 
 > [!WARNING]
-> **Nem minden busz követhető még élőben.** Székesfehérváron most kezdődött a buszok
-> fedélzeti egységeinek (OBU) beszerzése, így egyelőre nem minden busz küldi a helyzetét. Ha egy
-> busz nem látszik a térképen, attól még közlekedhet: ilyenkor a menetrend szerinti időket
-> mutatja az app. Erről indításkor figyelmeztetés szól, a térképen pedig mindig ott a kis sárga
-> felkiáltójel, amely újra megnyitja.
+> **Nem minden busz követhető még élőben.** A fehérvári helyi buszokra most szerelik fel a
+> fedélzeti egységeket (OBU), a [város tájékoztatása](https://www.szekesfehervar.hu/obu-a-fehervari-buszokon-ujabb-lepes-az-utasbarat-kozossegi-kozlekedes-erdekeben)
+> szerint nagyjából egy hónapon belül minden busz megkapja. Addig ha egy busz nem látszik a
+> térképen, attól még közlekedhet: ilyenkor a menetrend szerinti időket mutatja az app.
 
 ## Funkciók
 
