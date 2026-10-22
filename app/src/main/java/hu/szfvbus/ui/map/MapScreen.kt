@@ -425,7 +425,7 @@ private fun toast(context: android.content.Context, text: String) {
 @Composable
 private fun AboutText() {
     val context = LocalContext.current
-    Text("Készítette: QuaternionDev\n\nSzékesfehérvár helyi buszközlekedése élőben.")
+    Text("Készítette: QuaternionDev\n\nAndroid alkalmazás Székesfehérvár helyi buszközlekedéséhez.")
     Spacer(Modifier.height(12.dp))
     Surface(shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.secondaryContainer) {
         Column(Modifier.padding(12.dp)) {
