@@ -1,0 +1,605 @@
+{
+ "data": {
+  "agency": {
+   "routes": [
+    {
+     "gtfsId": "hkir:hkir_V-14827-R-X",
+     "shortName": null,
+     "longName": "Névtelen",
+     "patterns": []
+    },
+    {
+     "gtfsId": "hkir:hkir_V-14827-R-42",
+     "shortName": "42",
+     "longName": "Autóbusz-állomás – Temető",
+     "color": "1E1E1E",
+     "textColor": "FFFFFF",
+     "patterns": [
+      {
+       "stops": [
+        {
+         "gtfsId": "hkir:hkir_900202_1",
+         "name": "Székesfehérvár, Autóbusz-állomás",
+         "lat": 47.1992,
+         "lon": 18.425,
+         "platformCode": "1"
+        },
+        {
+         "gtfsId": "hkir:hkir_900101_1",
+         "name": "Székesfehérvár, Fő tér",
+         "lat": 47.193767,
+         "lon": 18.4105,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900301_1",
+         "name": "Székesfehérvár, Malom utca",
+         "lat": 47.195,
+         "lon": 18.406,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900302_1",
+         "name": "Székesfehérvár, Gesztenyés utca",
+         "lat": 47.1985,
+         "lon": 18.4,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900303_1",
+         "name": "Székesfehérvár, Kórház",
+         "lat": 47.204,
+         "lon": 18.396,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900308_1",
+         "name": "Székesfehérvár, Temető",
+         "lat": 47.215,
+         "lon": 18.385,
+         "platformCode": null
+        }
+       ]
+      },
+      {
+       "stops": [
+        {
+         "gtfsId": "hkir:hkir_900308_2",
+         "name": "Székesfehérvár, Temető",
+         "lat": 47.2152,
+         "lon": 18.3848,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900303_2",
+         "name": "Székesfehérvár, Kórház",
+         "lat": 47.2042,
+         "lon": 18.3958,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900302_2",
+         "name": "Székesfehérvár, Gesztenyés utca",
+         "lat": 47.1987,
+         "lon": 18.3998,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900301_2",
+         "name": "Székesfehérvár, Malom utca",
+         "lat": 47.1952,
+         "lon": 18.4058,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900101_2",
+         "name": "Székesfehérvár, Fő tér",
+         "lat": 47.1939,
+         "lon": 18.4108,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900202_2",
+         "name": "Székesfehérvár, Autóbusz-állomás",
+         "lat": 47.1994,
+         "lon": 18.425,
+         "platformCode": "2"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "gtfsId": "hkir:hkir_V-14827-R-35",
+     "shortName": "35",
+     "longName": "Vasútállomás – Kórház",
+     "color": "1E1E1E",
+     "textColor": "FFFFFF",
+     "patterns": [
+      {
+       "stops": [
+        {
+         "gtfsId": "hkir:hkir_900201_4",
+         "name": "Székesfehérvár, vasútállomás",
+         "lat": 47.1818,
+         "lon": 18.415,
+         "platformCode": "14"
+        },
+        {
+         "gtfsId": "hkir:hkir_900201_1",
+         "name": "Székesfehérvár, vasútállomás",
+         "lat": 47.1812,
+         "lon": 18.415,
+         "platformCode": "11"
+        },
+        {
+         "gtfsId": "hkir:hkir_900307_1",
+         "name": "Székesfehérvár, Sportcsarnok",
+         "lat": 47.186,
+         "lon": 18.405,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900101_1",
+         "name": "Székesfehérvár, Fő tér",
+         "lat": 47.193767,
+         "lon": 18.4105,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900301_1",
+         "name": "Székesfehérvár, Malom utca",
+         "lat": 47.195,
+         "lon": 18.406,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900303_1",
+         "name": "Székesfehérvár, Kórház",
+         "lat": 47.204,
+         "lon": 18.396,
+         "platformCode": null
+        }
+       ]
+      },
+      {
+       "stops": [
+        {
+         "gtfsId": "hkir:hkir_900303_2",
+         "name": "Székesfehérvár, Kórház",
+         "lat": 47.2042,
+         "lon": 18.3958,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900301_2",
+         "name": "Székesfehérvár, Malom utca",
+         "lat": 47.1952,
+         "lon": 18.4058,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900101_2",
+         "name": "Székesfehérvár, Fő tér",
+         "lat": 47.1939,
+         "lon": 18.4108,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900307_2",
+         "name": "Székesfehérvár, Sportcsarnok",
+         "lat": 47.1862,
+         "lon": 18.4048,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900201_2",
+         "name": "Székesfehérvár, vasútállomás",
+         "lat": 47.1814,
+         "lon": 18.415,
+         "platformCode": "12"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "gtfsId": "hkir:hkir_V-14827-R-24",
+     "shortName": "24",
+     "longName": "Kórház – Temető",
+     "color": "1E1E1E",
+     "textColor": "FFFFFF",
+     "patterns": [
+      {
+       "stops": [
+        {
+         "gtfsId": "hkir:hkir_900303_1",
+         "name": "Székesfehérvár, Kórház",
+         "lat": 47.204,
+         "lon": 18.396,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900308_1",
+         "name": "Székesfehérvár, Temető",
+         "lat": 47.215,
+         "lon": 18.385,
+         "platformCode": null
+        }
+       ]
+      },
+      {
+       "stops": [
+        {
+         "gtfsId": "hkir:hkir_900308_2",
+         "name": "Székesfehérvár, Temető",
+         "lat": 47.2152,
+         "lon": 18.3848,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900303_2",
+         "name": "Székesfehérvár, Kórház",
+         "lat": 47.2042,
+         "lon": 18.3958,
+         "platformCode": null
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "gtfsId": "hkir:hkir_V-14827-R-20",
+     "shortName": "20",
+     "longName": "Autóbusz-állomás – Kertváros",
+     "color": "1E1E1E",
+     "textColor": "FFFFFF",
+     "patterns": [
+      {
+       "stops": [
+        {
+         "gtfsId": "hkir:hkir_900202_3",
+         "name": "Székesfehérvár, Autóbusz-állomás",
+         "lat": 47.1996,
+         "lon": 18.425,
+         "platformCode": "3"
+        },
+        {
+         "gtfsId": "hkir:hkir_900305_1",
+         "name": "Székesfehérvár, Kertváros",
+         "lat": 47.21,
+         "lon": 18.44,
+         "platformCode": null
+        }
+       ]
+      },
+      {
+       "stops": [
+        {
+         "gtfsId": "hkir:hkir_900305_2",
+         "name": "Székesfehérvár, Kertváros",
+         "lat": 47.2102,
+         "lon": 18.4398,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900202_3",
+         "name": "Székesfehérvár, Autóbusz-állomás",
+         "lat": 47.1996,
+         "lon": 18.425,
+         "platformCode": "3"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "gtfsId": "hkir:hkir_V-14827-R-14G",
+     "shortName": "14G",
+     "longName": "Vasútállomás – Ipari park (gyorsjárat)",
+     "color": "1E1E1E",
+     "textColor": "FFFFFF",
+     "patterns": [
+      {
+       "stops": [
+        {
+         "gtfsId": "hkir:hkir_900201_3",
+         "name": "Székesfehérvár, vasútállomás",
+         "lat": 47.1816,
+         "lon": 18.415,
+         "platformCode": "13"
+        },
+        {
+         "gtfsId": "hkir:hkir_900304_1",
+         "name": "Székesfehérvár, Ipari park",
+         "lat": 47.17,
+         "lon": 18.44,
+         "platformCode": null
+        }
+       ]
+      },
+      {
+       "stops": [
+        {
+         "gtfsId": "hkir:hkir_900304_2",
+         "name": "Székesfehérvár, Ipari park",
+         "lat": 47.1702,
+         "lon": 18.4398,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900201_4",
+         "name": "Székesfehérvár, vasútállomás",
+         "lat": 47.1818,
+         "lon": 18.415,
+         "platformCode": "14"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "gtfsId": "hkir:hkir_V-14827-R-14",
+     "shortName": "14",
+     "longName": "Vasútállomás – Ipari park",
+     "color": "1E1E1E",
+     "textColor": "FFFFFF",
+     "patterns": [
+      {
+       "stops": [
+        {
+         "gtfsId": "hkir:hkir_900201_3",
+         "name": "Székesfehérvár, vasútállomás",
+         "lat": 47.1816,
+         "lon": 18.415,
+         "platformCode": "13"
+        },
+        {
+         "gtfsId": "hkir:hkir_900306_1",
+         "name": "Székesfehérvár, Liliom utca",
+         "lat": 47.188,
+         "lon": 18.42,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900304_1",
+         "name": "Székesfehérvár, Ipari park",
+         "lat": 47.17,
+         "lon": 18.44,
+         "platformCode": null
+        }
+       ]
+      },
+      {
+       "stops": [
+        {
+         "gtfsId": "hkir:hkir_900304_2",
+         "name": "Székesfehérvár, Ipari park",
+         "lat": 47.1702,
+         "lon": 18.4398,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900306_2",
+         "name": "Székesfehérvár, Liliom utca",
+         "lat": 47.1882,
+         "lon": 18.4198,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900201_4",
+         "name": "Székesfehérvár, vasútállomás",
+         "lat": 47.1818,
+         "lon": 18.415,
+         "platformCode": "14"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "gtfsId": "hkir:hkir_V-14827-R-12",
+     "shortName": "12",
+     "longName": "Autóbusz-állomás – Temető",
+     "color": "1E1E1E",
+     "textColor": "FFFFFF",
+     "patterns": [
+      {
+       "stops": [
+        {
+         "gtfsId": "hkir:hkir_900202_1",
+         "name": "Székesfehérvár, Autóbusz-állomás",
+         "lat": 47.1992,
+         "lon": 18.425,
+         "platformCode": "1"
+        },
+        {
+         "gtfsId": "hkir:hkir_900306_1",
+         "name": "Székesfehérvár, Liliom utca",
+         "lat": 47.188,
+         "lon": 18.42,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900101_1",
+         "name": "Székesfehérvár, Fő tér",
+         "lat": 47.193767,
+         "lon": 18.4105,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900301_1",
+         "name": "Székesfehérvár, Malom utca",
+         "lat": 47.195,
+         "lon": 18.406,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900303_1",
+         "name": "Székesfehérvár, Kórház",
+         "lat": 47.204,
+         "lon": 18.396,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900308_1",
+         "name": "Székesfehérvár, Temető",
+         "lat": 47.215,
+         "lon": 18.385,
+         "platformCode": null
+        }
+       ]
+      },
+      {
+       "stops": [
+        {
+         "gtfsId": "hkir:hkir_900308_2",
+         "name": "Székesfehérvár, Temető",
+         "lat": 47.2152,
+         "lon": 18.3848,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900303_2",
+         "name": "Székesfehérvár, Kórház",
+         "lat": 47.2042,
+         "lon": 18.3958,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900301_2",
+         "name": "Székesfehérvár, Malom utca",
+         "lat": 47.1952,
+         "lon": 18.4058,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900101_2",
+         "name": "Székesfehérvár, Fő tér",
+         "lat": 47.1939,
+         "lon": 18.4108,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900306_2",
+         "name": "Székesfehérvár, Liliom utca",
+         "lat": 47.1882,
+         "lon": 18.4198,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900202_2",
+         "name": "Székesfehérvár, Autóbusz-állomás",
+         "lat": 47.1994,
+         "lon": 18.425,
+         "platformCode": "2"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "gtfsId": "hkir:hkir_V-14827-R-10",
+     "shortName": "10",
+     "longName": "Vasútállomás – Kórház",
+     "color": "1E1E1E",
+     "textColor": "FFFFFF",
+     "patterns": [
+      {
+       "stops": [
+        {
+         "gtfsId": "hkir:hkir_900201_1",
+         "name": "Székesfehérvár, vasútállomás",
+         "lat": 47.1812,
+         "lon": 18.415,
+         "platformCode": "11"
+        },
+        {
+         "gtfsId": "hkir:hkir_900307_1",
+         "name": "Székesfehérvár, Sportcsarnok",
+         "lat": 47.186,
+         "lon": 18.405,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900101_1",
+         "name": "Székesfehérvár, Fő tér",
+         "lat": 47.193767,
+         "lon": 18.4105,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900301_1",
+         "name": "Székesfehérvár, Malom utca",
+         "lat": 47.195,
+         "lon": 18.406,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900302_1",
+         "name": "Székesfehérvár, Gesztenyés utca",
+         "lat": 47.1985,
+         "lon": 18.4,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900303_1",
+         "name": "Székesfehérvár, Kórház",
+         "lat": 47.204,
+         "lon": 18.396,
+         "platformCode": null
+        }
+       ]
+      },
+      {
+       "stops": [
+        {
+         "gtfsId": "hkir:hkir_900303_2",
+         "name": "Székesfehérvár, Kórház",
+         "lat": 47.2042,
+         "lon": 18.3958,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900302_2",
+         "name": "Székesfehérvár, Gesztenyés utca",
+         "lat": 47.1987,
+         "lon": 18.3998,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900301_2",
+         "name": "Székesfehérvár, Malom utca",
+         "lat": 47.1952,
+         "lon": 18.4058,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900101_2",
+         "name": "Székesfehérvár, Fő tér",
+         "lat": 47.1939,
+         "lon": 18.4108,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900307_2",
+         "name": "Székesfehérvár, Sportcsarnok",
+         "lat": 47.1862,
+         "lon": 18.4048,
+         "platformCode": null
+        },
+        {
+         "gtfsId": "hkir:hkir_900201_2",
+         "name": "Székesfehérvár, vasútállomás",
+         "lat": 47.1814,
+         "lon": 18.415,
+         "platformCode": "12"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

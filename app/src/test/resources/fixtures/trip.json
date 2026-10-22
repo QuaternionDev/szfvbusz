@@ -1,0 +1,120 @@
+{
+ "data": {
+  "trip": {
+   "gtfsId": "hkir:hkir_T-35-01",
+   "tripHeadsign": "Székesfehérvár, Kórház",
+   "wheelchairAccessible": "POSSIBLE",
+   "route": {
+    "gtfsId": "hkir:hkir_V-14827-R-35",
+    "shortName": "35",
+    "mode": "BUS",
+    "agency": {
+     "gtfsId": "hkir:hkir_V-14827"
+    }
+   },
+   "pattern": {
+    "patternGeometry": {
+     "points": "ge~~GwtkoBf@?f@?f@?_IxS_IzS_IxSeOmJeOoJeOmJqAjHqAjHqAjHwQxSwQzSwQxS"
+    }
+   },
+   "stoptimesForDate": [
+    {
+     "stop": {
+      "gtfsId": "hkir:hkir_900201_4",
+      "name": "Székesfehérvár, vasútállomás",
+      "lat": 47.1818,
+      "lon": 18.415,
+      "platformCode": "14"
+     },
+     "scheduledArrival": 25200,
+     "realtimeArrival": 25200,
+     "scheduledDeparture": 25200,
+     "realtimeDeparture": 25200,
+     "departureDelay": 0,
+     "realtime": false,
+     "serviceDay": 1792620000
+    },
+    {
+     "stop": {
+      "gtfsId": "hkir:hkir_900201_1",
+      "name": "Székesfehérvár, vasútállomás",
+      "lat": 47.1812,
+      "lon": 18.415,
+      "platformCode": "11"
+     },
+     "scheduledArrival": 25320,
+     "realtimeArrival": 25320,
+     "scheduledDeparture": 25320,
+     "realtimeDeparture": 25320,
+     "departureDelay": 0,
+     "realtime": false,
+     "serviceDay": 1792620000
+    },
+    {
+     "stop": {
+      "gtfsId": "hkir:hkir_900307_1",
+      "name": "Székesfehérvár, Sportcsarnok",
+      "lat": 47.186,
+      "lon": 18.405,
+      "platformCode": null
+     },
+     "scheduledArrival": 25500,
+     "realtimeArrival": 25560,
+     "scheduledDeparture": 25500,
+     "realtimeDeparture": 25560,
+     "departureDelay": 60,
+     "realtime": true,
+     "serviceDay": 1792620000
+    },
+    {
+     "stop": {
+      "gtfsId": "hkir:hkir_900101_1",
+      "name": "Székesfehérvár, Fő tér",
+      "lat": 47.193767,
+      "lon": 18.4105,
+      "platformCode": null
+     },
+     "scheduledArrival": 25680,
+     "realtimeArrival": 25740,
+     "scheduledDeparture": 25680,
+     "realtimeDeparture": 25740,
+     "departureDelay": 60,
+     "realtime": true,
+     "serviceDay": 1792620000
+    },
+    {
+     "stop": {
+      "gtfsId": "hkir:hkir_900301_1",
+      "name": "Székesfehérvár, Malom utca",
+      "lat": 47.195,
+      "lon": 18.406,
+      "platformCode": null
+     },
+     "scheduledArrival": 25800,
+     "realtimeArrival": 25860,
+     "scheduledDeparture": 25800,
+     "realtimeDeparture": 25860,
+     "departureDelay": 60,
+     "realtime": true,
+     "serviceDay": 1792620000
+    },
+    {
+     "stop": {
+      "gtfsId": "hkir:hkir_900303_1",
+      "name": "Székesfehérvár, Kórház",
+      "lat": 47.204,
+      "lon": 18.396,
+      "platformCode": null
+     },
+     "scheduledArrival": 26160,
+     "realtimeArrival": 26220,
+     "scheduledDeparture": 26160,
+     "realtimeDeparture": 26220,
+     "departureDelay": 60,
+     "realtime": true,
+     "serviceDay": 1792620000
+    }
+   ]
+  }
+ }
+}

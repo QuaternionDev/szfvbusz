@@ -1,0 +1,17 @@
+*.iml
+.gradle/
+.kotlin/
+/local.properties
+/.idea/
+.DS_Store
+/build/
+/app/build/
+/captures/
+.externalNativeBuild/
+.cxx/
+
+# Aláírókulcsok és belső jegyzetek
+*.jks
+*.keystore
+keystore.properties
+/TERV.md

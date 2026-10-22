@@ -1,0 +1,27 @@
+{
+ "data": {
+  "alerts": [
+   {
+    "id": "QWxlcnQ6dGVzenQtMQ",
+    "alertHeaderText": "Kitaláltfalva: a 7999-es járat terelve közlekedik",
+    "alertDescriptionText": "<p>Útfelújítás miatt a <strong>7999</strong> jelzésű helyközi járat terelve közlekedik.</p>",
+    "alertUrl": null,
+    "effectiveStartDate": 1792533600,
+    "effectiveEndDate": null,
+    "entities": [
+     {
+      "__typename": "Trip"
+     },
+     {
+      "__typename": "Route",
+      "gtfsId": "hkir:hkir_V-R-7999",
+      "shortName": "7999",
+      "agency": {
+       "gtfsId": "hkir:hkir_V"
+      }
+     }
+    ]
+   }
+  ]
+ }
+}

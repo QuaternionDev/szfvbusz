@@ -1,0 +1,224 @@
+{
+ "data": {
+  "stops": [
+   {
+    "gtfsId": "hkir:hkir_900101_1",
+    "stoptimesWithoutPatterns": [
+     {
+      "scheduledDeparture": 25500,
+      "realtimeDeparture": 25560,
+      "departureDelay": 60,
+      "realtime": true,
+      "serviceDay": 1792620000,
+      "headsign": "Székesfehérvár, Kórház",
+      "stop": {
+       "gtfsId": "hkir:hkir_900101_1"
+      },
+      "trip": {
+       "gtfsId": "hkir:hkir_T-10-11",
+       "tripHeadsign": "Székesfehérvár, Kórház",
+       "route": {
+        "gtfsId": "hkir:hkir_V-14827-R-10",
+        "shortName": "10",
+        "mode": "BUS",
+        "agency": {
+         "gtfsId": "hkir:hkir_V-14827"
+        }
+       }
+      }
+     },
+     {
+      "scheduledDeparture": 25320,
+      "realtimeDeparture": 25320,
+      "departureDelay": 0,
+      "realtime": false,
+      "serviceDay": 1792620000,
+      "headsign": "Székesfehérvár, Temető",
+      "stop": {
+       "gtfsId": "hkir:hkir_900101_1"
+      },
+      "trip": {
+       "gtfsId": "hkir:hkir_T-42-12",
+       "tripHeadsign": "Székesfehérvár, Temető",
+       "route": {
+        "gtfsId": "hkir:hkir_V-14827-R-42",
+        "shortName": "42",
+        "mode": "BUS",
+        "agency": {
+         "gtfsId": "hkir:hkir_V-14827"
+        }
+       }
+      }
+     },
+     {
+      "scheduledDeparture": 26100,
+      "realtimeDeparture": 26340,
+      "departureDelay": 240,
+      "realtime": true,
+      "serviceDay": 1792620000,
+      "headsign": "Székesfehérvár, Temető",
+      "stop": {
+       "gtfsId": "hkir:hkir_900101_1"
+      },
+      "trip": {
+       "gtfsId": "hkir:hkir_T-12-13",
+       "tripHeadsign": "Székesfehérvár, Temető",
+       "route": {
+        "gtfsId": "hkir:hkir_V-14827-R-12",
+        "shortName": "12",
+        "mode": "BUS",
+        "agency": {
+         "gtfsId": "hkir:hkir_V-14827"
+        }
+       }
+      }
+     },
+     {
+      "scheduledDeparture": 25800,
+      "realtimeDeparture": 25770,
+      "departureDelay": -30,
+      "realtime": true,
+      "serviceDay": 1792620000,
+      "headsign": "Székesfehérvár, Kórház",
+      "stop": {
+       "gtfsId": "hkir:hkir_900101_1"
+      },
+      "trip": {
+       "gtfsId": "hkir:hkir_T-35-14",
+       "tripHeadsign": "Székesfehérvár, Kórház",
+       "route": {
+        "gtfsId": "hkir:hkir_V-14827-R-35",
+        "shortName": "35",
+        "mode": "BUS",
+        "agency": {
+         "gtfsId": "hkir:hkir_V-14827"
+        }
+       }
+      }
+     },
+     {
+      "scheduledDeparture": 25500,
+      "realtimeDeparture": 25560,
+      "departureDelay": 60,
+      "realtime": true,
+      "serviceDay": 1792620000,
+      "headsign": "Székesfehérvár, Kórház",
+      "stop": {
+       "gtfsId": "hkir:hkir_900101_1"
+      },
+      "trip": {
+       "gtfsId": "hkir:hkir_T-10-11",
+       "tripHeadsign": "Székesfehérvár, Kórház",
+       "route": {
+        "gtfsId": "hkir:hkir_V-14827-R-10",
+        "shortName": "10",
+        "mode": "BUS",
+        "agency": {
+         "gtfsId": "hkir:hkir_V-14827"
+        }
+       }
+      }
+     }
+    ]
+   },
+   {
+    "gtfsId": "hkir:hkir_900101_2",
+    "stoptimesWithoutPatterns": [
+     {
+      "scheduledDeparture": 25620,
+      "realtimeDeparture": 25620,
+      "departureDelay": 0,
+      "realtime": false,
+      "serviceDay": 1792620000,
+      "headsign": "Székesfehérvár, vasútállomás",
+      "stop": {
+       "gtfsId": "hkir:hkir_900101_2"
+      },
+      "trip": {
+       "gtfsId": "hkir:hkir_T-10-21",
+       "tripHeadsign": "Székesfehérvár, vasútállomás",
+       "route": {
+        "gtfsId": "hkir:hkir_V-14827-R-10",
+        "shortName": "10",
+        "mode": "BUS",
+        "agency": {
+         "gtfsId": "hkir:hkir_V-14827"
+        }
+       }
+      }
+     },
+     {
+      "scheduledDeparture": 25380,
+      "realtimeDeparture": 25500,
+      "departureDelay": 120,
+      "realtime": true,
+      "serviceDay": 1792620000,
+      "headsign": "Székesfehérvár, Autóbusz-állomás",
+      "stop": {
+       "gtfsId": "hkir:hkir_900101_2"
+      },
+      "trip": {
+       "gtfsId": "hkir:hkir_T-12-22",
+       "tripHeadsign": "Székesfehérvár, Autóbusz-állomás",
+       "route": {
+        "gtfsId": "hkir:hkir_V-14827-R-12",
+        "shortName": "12",
+        "mode": "BUS",
+        "agency": {
+         "gtfsId": "hkir:hkir_V-14827"
+        }
+       }
+      }
+     },
+     {
+      "scheduledDeparture": 26400,
+      "realtimeDeparture": 26400,
+      "departureDelay": 0,
+      "realtime": true,
+      "serviceDay": 1792620000,
+      "headsign": "Székesfehérvár, Autóbusz-állomás",
+      "stop": {
+       "gtfsId": "hkir:hkir_900101_2"
+      },
+      "trip": {
+       "gtfsId": "hkir:hkir_T-42-23",
+       "tripHeadsign": "Székesfehérvár, Autóbusz-állomás",
+       "route": {
+        "gtfsId": "hkir:hkir_V-14827-R-42",
+        "shortName": "42",
+        "mode": "BUS",
+        "agency": {
+         "gtfsId": "hkir:hkir_V-14827"
+        }
+       }
+      }
+     },
+     {
+      "scheduledDeparture": 25260,
+      "realtimeDeparture": 25290,
+      "departureDelay": 30,
+      "realtime": true,
+      "serviceDay": 1792620000,
+      "headsign": "Székesfehérvár, vasútállomás",
+      "stop": {
+       "gtfsId": "hkir:hkir_900101_2"
+      },
+      "trip": {
+       "gtfsId": "hkir:hkir_T-35-24",
+       "tripHeadsign": "Székesfehérvár, vasútállomás",
+       "route": {
+        "gtfsId": "hkir:hkir_V-14827-R-35",
+        "shortName": "35",
+        "mode": "BUS",
+        "agency": {
+         "gtfsId": "hkir:hkir_V-14827"
+        }
+       }
+      }
+     }
+    ]
+   },
+   null
+  ]
+ }
+}

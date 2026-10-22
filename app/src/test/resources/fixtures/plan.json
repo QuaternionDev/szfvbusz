@@ -1,0 +1,637 @@
+{
+ "data": {
+  "plan": {
+   "itineraries": [
+    {
+     "startTime": 1792647000000,
+     "endTime": 1792648260000,
+     "walkDistance": 1480,
+     "legs": [
+      {
+       "mode": "WALK",
+       "startTime": 1792647000000,
+       "endTime": 1792648260000,
+       "realTime": false,
+       "departureDelay": 0,
+       "distance": 1480,
+       "serviceDate": null,
+       "from": {
+        "name": "Origin",
+        "lat": 47.1925,
+        "lon": 18.4105
+       },
+       "to": {
+        "name": "Destination",
+        "lat": 47.2004,
+        "lon": 18.3976
+       },
+       "legGeometry": {
+        "points": "ch`_HsxjoBkp@roA"
+       }
+      }
+     ]
+    },
+    {
+     "startTime": 1792647060000,
+     "endTime": 1792647900000,
+     "walkDistance": 640,
+     "legs": [
+      {
+       "mode": "WALK",
+       "startTime": 1792647060000,
+       "endTime": 1792647300000,
+       "realTime": false,
+       "departureDelay": 0,
+       "distance": 150,
+       "serviceDate": null,
+       "from": {
+        "name": "Origin",
+        "lat": 47.1925,
+        "lon": 18.4105
+       },
+       "to": {
+        "name": "Székesfehérvár, Fő tér",
+        "lat": 47.19376650986069,
+        "lon": 18.4105,
+        "stop": {
+         "gtfsId": "hkir:hkir_900101_1",
+         "platformCode": null
+        }
+       },
+       "legGeometry": {
+        "points": "ch`_HsxjoB}F?"
+       }
+      },
+      {
+       "mode": "BUS",
+       "startTime": 1792647300000,
+       "endTime": 1792647720000,
+       "realTime": true,
+       "departureDelay": 60,
+       "distance": 1500,
+       "serviceDate": "2026-10-22",
+       "from": {
+        "name": "Székesfehérvár, Fő tér",
+        "lat": 47.19376650986069,
+        "lon": 18.4105,
+        "stop": {
+         "gtfsId": "hkir:hkir_900101_1",
+         "platformCode": null
+        }
+       },
+       "to": {
+        "name": "Székesfehérvár, Kórház",
+        "lat": 47.204,
+        "lon": 18.396,
+        "stop": {
+         "gtfsId": "hkir:hkir_900303_1",
+         "platformCode": null
+        }
+       },
+       "legGeometry": {
+        "points": "ap`_HsxjoB}~@ryA"
+       },
+       "route": {
+        "gtfsId": "hkir:hkir_V-14827-R-10",
+        "shortName": "10",
+        "mode": "BUS",
+        "agency": {
+         "gtfsId": "hkir:hkir_V-14827"
+        }
+       },
+       "trip": {
+        "gtfsId": "hkir:hkir_T-10-50",
+        "tripHeadsign": "Székesfehérvár, Kórház"
+       },
+       "headsign": "Székesfehérvár, Kórház",
+       "intermediateStops": [
+        {
+         "name": "Székesfehérvár, Malom utca"
+        },
+        {
+         "name": "Székesfehérvár, Gesztenyés utca"
+        }
+       ]
+      },
+      {
+       "mode": "WALK",
+       "startTime": 1792647720000,
+       "endTime": 1792647900000,
+       "realTime": false,
+       "departureDelay": 0,
+       "distance": 490,
+       "serviceDate": null,
+       "from": {
+        "name": "Székesfehérvár, Kórház",
+        "lat": 47.204,
+        "lon": 18.396,
+        "stop": {
+         "gtfsId": "hkir:hkir_900303_1",
+         "platformCode": null
+        }
+       },
+       "to": {
+        "name": "Destination",
+        "lat": 47.2004,
+        "lon": 18.3976
+       },
+       "legGeometry": {
+        "points": "_pb_H_~goBnU_I"
+       }
+      }
+     ]
+    },
+    {
+     "startTime": 1792647000000,
+     "endTime": 1792648020000,
+     "walkDistance": 300,
+     "legs": [
+      {
+       "mode": "WALK",
+       "startTime": 1792647000000,
+       "endTime": 1792647240000,
+       "realTime": false,
+       "departureDelay": 0,
+       "distance": 150,
+       "serviceDate": null,
+       "from": {
+        "name": "Origin",
+        "lat": 47.1925,
+        "lon": 18.4105
+       },
+       "to": {
+        "name": "Székesfehérvár, Fő tér",
+        "lat": 47.19376650986069,
+        "lon": 18.4105,
+        "stop": {
+         "gtfsId": "hkir:hkir_900101_1",
+         "platformCode": null
+        }
+       },
+       "legGeometry": {
+        "points": "ch`_HsxjoB}F?"
+       }
+      },
+      {
+       "mode": "BUS",
+       "startTime": 1792647600000,
+       "endTime": 1792647900000,
+       "realTime": false,
+       "departureDelay": 0,
+       "distance": 1100,
+       "serviceDate": "2026-10-22",
+       "from": {
+        "name": "Székesfehérvár, Fő tér",
+        "lat": 47.19376650986069,
+        "lon": 18.4105,
+        "stop": {
+         "gtfsId": "hkir:hkir_900101_1",
+         "platformCode": null
+        }
+       },
+       "to": {
+        "name": "Székesfehérvár, Gesztenyés utca",
+        "lat": 47.1985,
+        "lon": 18.4,
+        "stop": {
+         "gtfsId": "hkir:hkir_900302_1",
+         "platformCode": null
+        }
+       },
+       "legGeometry": {
+        "points": "ap`_HsxjoBq\\r`A"
+       },
+       "route": {
+        "gtfsId": "hkir:hkir_V-14827-R-42",
+        "shortName": "42",
+        "mode": "BUS",
+        "agency": {
+         "gtfsId": "hkir:hkir_V-14827"
+        }
+       },
+       "trip": {
+        "gtfsId": "hkir:hkir_T-42-50",
+        "tripHeadsign": "Székesfehérvár, Kórház"
+       },
+       "headsign": "Székesfehérvár, Kórház",
+       "intermediateStops": [
+        {
+         "name": "Székesfehérvár, Malom utca"
+        }
+       ]
+      },
+      {
+       "mode": "WALK",
+       "startTime": 1792647900000,
+       "endTime": 1792648020000,
+       "realTime": false,
+       "departureDelay": 0,
+       "distance": 150,
+       "serviceDate": null,
+       "from": {
+        "name": "Székesfehérvár, Gesztenyés utca",
+        "lat": 47.1985,
+        "lon": 18.4,
+        "stop": {
+         "gtfsId": "hkir:hkir_900302_1",
+         "platformCode": null
+        }
+       },
+       "to": {
+        "name": "Destination",
+        "lat": 47.2004,
+        "lon": 18.3976
+       },
+       "legGeometry": {
+        "points": "sma_H_whoB{J~M"
+       }
+      }
+     ]
+    },
+    {
+     "startTime": 1792647120000,
+     "endTime": 1792647960000,
+     "walkDistance": 420,
+     "legs": [
+      {
+       "mode": "WALK",
+       "startTime": 1792647120000,
+       "endTime": 1792647400000,
+       "realTime": false,
+       "departureDelay": 0,
+       "distance": 300,
+       "serviceDate": null,
+       "from": {
+        "name": "Origin",
+        "lat": 47.1925,
+        "lon": 18.4105
+       },
+       "to": {
+        "name": "Székesfehérvár, Malom utca",
+        "lat": 47.195,
+        "lon": 18.406,
+        "stop": {
+         "gtfsId": "hkir:hkir_900301_1",
+         "platformCode": null
+        }
+       },
+       "legGeometry": {
+        "points": "ch`_HsxjoBsNb["
+       }
+      },
+      {
+       "mode": "BUS",
+       "startTime": 1792647480000,
+       "endTime": 1792647840000,
+       "realTime": false,
+       "departureDelay": 0,
+       "distance": 900,
+       "serviceDate": "2026-10-22",
+       "from": {
+        "name": "Székesfehérvár, Malom utca",
+        "lat": 47.195,
+        "lon": 18.406,
+        "stop": {
+         "gtfsId": "hkir:hkir_900301_1",
+         "platformCode": null
+        }
+       },
+       "to": {
+        "name": "Székesfehérvár, Kórház",
+        "lat": 47.204,
+        "lon": 18.396,
+        "stop": {
+         "gtfsId": "hkir:hkir_900303_1",
+         "platformCode": null
+        }
+       },
+       "legGeometry": {
+        "points": "ww`_Ho|ioBgw@n}@"
+       },
+       "route": {
+        "gtfsId": "hkir:hkir_V-14827-R-12",
+        "shortName": "12",
+        "mode": "BUS",
+        "agency": {
+         "gtfsId": "hkir:hkir_V-14827"
+        }
+       },
+       "trip": {
+        "gtfsId": "hkir:hkir_T-12-50",
+        "tripHeadsign": "Székesfehérvár, Kórház"
+       },
+       "headsign": "Székesfehérvár, Kórház",
+       "intermediateStops": []
+      },
+      {
+       "mode": "WALK",
+       "startTime": 1792647840000,
+       "endTime": 1792647960000,
+       "realTime": false,
+       "departureDelay": 0,
+       "distance": 120,
+       "serviceDate": null,
+       "from": {
+        "name": "Székesfehérvár, Kórház",
+        "lat": 47.204,
+        "lon": 18.396,
+        "stop": {
+         "gtfsId": "hkir:hkir_900303_1",
+         "platformCode": null
+        }
+       },
+       "to": {
+        "name": "Destination",
+        "lat": 47.2004,
+        "lon": 18.3976
+       },
+       "legGeometry": {
+        "points": "_pb_H_~goBnU_I"
+       }
+      }
+     ]
+    },
+    {
+     "startTime": 1792647300000,
+     "endTime": 1792648500000,
+     "walkDistance": 260,
+     "legs": [
+      {
+       "mode": "WALK",
+       "startTime": 1792647300000,
+       "endTime": 1792647420000,
+       "realTime": false,
+       "departureDelay": 0,
+       "distance": 150,
+       "serviceDate": null,
+       "from": {
+        "name": "Origin",
+        "lat": 47.1925,
+        "lon": 18.4105
+       },
+       "to": {
+        "name": "Székesfehérvár, Fő tér",
+        "lat": 47.19376650986069,
+        "lon": 18.4105,
+        "stop": {
+         "gtfsId": "hkir:hkir_900101_1",
+         "platformCode": null
+        }
+       },
+       "legGeometry": {
+        "points": "ch`_HsxjoB}F?"
+       }
+      },
+      {
+       "mode": "BUS",
+       "startTime": 1792647600000,
+       "endTime": 1792647780000,
+       "realTime": false,
+       "departureDelay": 0,
+       "distance": 500,
+       "serviceDate": "2026-10-22",
+       "from": {
+        "name": "Székesfehérvár, Fő tér",
+        "lat": 47.19376650986069,
+        "lon": 18.4105,
+        "stop": {
+         "gtfsId": "hkir:hkir_900101_1",
+         "platformCode": null
+        }
+       },
+       "to": {
+        "name": "Székesfehérvár, Malom utca",
+        "lat": 47.195,
+        "lon": 18.406,
+        "stop": {
+         "gtfsId": "hkir:hkir_900301_1",
+         "platformCode": null
+        }
+       },
+       "legGeometry": {
+        "points": "ap`_HsxjoBuFb["
+       },
+       "route": {
+        "gtfsId": "hkir:hkir_V-14827-R-35",
+        "shortName": "35",
+        "mode": "BUS",
+        "agency": {
+         "gtfsId": "hkir:hkir_V-14827"
+        }
+       },
+       "trip": {
+        "gtfsId": "hkir:hkir_T-35-50",
+        "tripHeadsign": "Székesfehérvár, Kórház"
+       },
+       "headsign": "Székesfehérvár, Kórház",
+       "intermediateStops": []
+      },
+      {
+       "mode": "WALK",
+       "startTime": 1792647780000,
+       "endTime": 1792647840000,
+       "realTime": false,
+       "departureDelay": 0,
+       "distance": 0,
+       "serviceDate": null,
+       "from": {
+        "name": "Székesfehérvár, Malom utca",
+        "lat": 47.195,
+        "lon": 18.406,
+        "stop": {
+         "gtfsId": "hkir:hkir_900301_1",
+         "platformCode": null
+        }
+       },
+       "to": {
+        "name": "Székesfehérvár, Gesztenyés utca",
+        "lat": 47.1985,
+        "lon": 18.4,
+        "stop": {
+         "gtfsId": "hkir:hkir_900302_1",
+         "platformCode": null
+        }
+       },
+       "legGeometry": {
+        "points": "ww`_Ho|ioB{Tnd@"
+       }
+      },
+      {
+       "mode": "BUS",
+       "startTime": 1792648200000,
+       "endTime": 1792648440000,
+       "realTime": false,
+       "departureDelay": 0,
+       "distance": 700,
+       "serviceDate": "2026-10-22",
+       "from": {
+        "name": "Székesfehérvár, Gesztenyés utca",
+        "lat": 47.1985,
+        "lon": 18.4,
+        "stop": {
+         "gtfsId": "hkir:hkir_900302_1",
+         "platformCode": null
+        }
+       },
+       "to": {
+        "name": "Székesfehérvár, Kórház",
+        "lat": 47.204,
+        "lon": 18.396,
+        "stop": {
+         "gtfsId": "hkir:hkir_900303_1",
+         "platformCode": null
+        }
+       },
+       "legGeometry": {
+        "points": "sma_H_whoBka@~W"
+       },
+       "route": {
+        "gtfsId": "hkir:hkir_V-14827-R-24",
+        "shortName": "24",
+        "mode": "BUS",
+        "agency": {
+         "gtfsId": "hkir:hkir_V-14827"
+        }
+       },
+       "trip": {
+        "gtfsId": "hkir:hkir_T-24-50",
+        "tripHeadsign": "Székesfehérvár, Kórház"
+       },
+       "headsign": "Székesfehérvár, Kórház",
+       "intermediateStops": []
+      },
+      {
+       "mode": "WALK",
+       "startTime": 1792648440000,
+       "endTime": 1792648500000,
+       "realTime": false,
+       "departureDelay": 0,
+       "distance": 110,
+       "serviceDate": null,
+       "from": {
+        "name": "Székesfehérvár, Kórház",
+        "lat": 47.204,
+        "lon": 18.396,
+        "stop": {
+         "gtfsId": "hkir:hkir_900303_1",
+         "platformCode": null
+        }
+       },
+       "to": {
+        "name": "Destination",
+        "lat": 47.2004,
+        "lon": 18.3976
+       },
+       "legGeometry": {
+        "points": "_pb_H_~goBnU_I"
+       }
+      }
+     ]
+    },
+    {
+     "startTime": 1792647000000,
+     "endTime": 1792648140000,
+     "walkDistance": 900,
+     "legs": [
+      {
+       "mode": "WALK",
+       "startTime": 1792647000000,
+       "endTime": 1792647600000,
+       "realTime": false,
+       "departureDelay": 0,
+       "distance": 700,
+       "serviceDate": null,
+       "from": {
+        "name": "Origin",
+        "lat": 47.1925,
+        "lon": 18.4105
+       },
+       "to": {
+        "name": "Székesfehérvár, Malom utca",
+        "lat": 47.1952,
+        "lon": 18.4058,
+        "stop": {
+         "gtfsId": "hkir:hkir_900301_2",
+         "platformCode": null
+        }
+       },
+       "legGeometry": {
+        "points": "ch`_HsxjoB{Oj\\"
+       }
+      },
+      {
+       "mode": "BUS",
+       "startTime": 1792647660000,
+       "endTime": 1792647960000,
+       "realTime": false,
+       "departureDelay": 0,
+       "distance": 1000,
+       "serviceDate": "2026-10-22",
+       "from": {
+        "name": "Székesfehérvár, Malom utca",
+        "lat": 47.1952,
+        "lon": 18.4058,
+        "stop": {
+         "gtfsId": "hkir:hkir_900301_2",
+         "platformCode": null
+        }
+       },
+       "to": {
+        "name": "Székesfehérvár, Kórház",
+        "lat": 47.2042,
+        "lon": 18.3958,
+        "stop": {
+         "gtfsId": "hkir:hkir_900303_2",
+         "platformCode": null
+        }
+       },
+       "legGeometry": {
+        "points": "_y`_Hg{ioBgw@n}@"
+       },
+       "route": {
+        "gtfsId": "hkir:hkir_V-R-7999",
+        "shortName": "7999",
+        "mode": "COACH",
+        "agency": {
+         "gtfsId": "hkir:hkir_V"
+        }
+       },
+       "trip": {
+        "gtfsId": "hkir:hkir_T-7999-50",
+        "tripHeadsign": "Székesfehérvár, Kórház"
+       },
+       "headsign": "Székesfehérvár, Kórház",
+       "intermediateStops": []
+      },
+      {
+       "mode": "WALK",
+       "startTime": 1792647960000,
+       "endTime": 1792648140000,
+       "realTime": false,
+       "departureDelay": 0,
+       "distance": 200,
+       "serviceDate": null,
+       "from": {
+        "name": "Székesfehérvár, Kórház",
+        "lat": 47.2042,
+        "lon": 18.3958,
+        "stop": {
+         "gtfsId": "hkir:hkir_900303_2",
+         "platformCode": null
+        }
+       },
+       "to": {
+        "name": "Destination",
+        "lat": 47.2004,
+        "lon": 18.3976
+       },
+       "legGeometry": {
+        "points": "gqb_Hw|goBvVgJ"
+       }
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

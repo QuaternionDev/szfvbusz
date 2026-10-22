@@ -1,0 +1,149 @@
+{
+ "data": {
+  "stops": [
+   {
+    "gtfsId": "hkir:hkir_900101_1",
+    "stoptimesForServiceDate": [
+     {
+      "pattern": {
+       "headsign": "Székesfehérvár, Temető",
+       "route": {
+        "gtfsId": "hkir:hkir_V-14827-R-42",
+        "shortName": "42",
+        "mode": "BUS",
+        "agency": {
+         "gtfsId": "hkir:hkir_V-14827"
+        }
+       }
+      },
+      "stoptimes": [
+       {
+        "scheduledDeparture": 18600,
+        "serviceDay": 1792533600
+       },
+       {
+        "scheduledDeparture": 22200,
+        "serviceDay": 1792533600
+       },
+       {
+        "scheduledDeparture": 29400,
+        "serviceDay": 1792533600
+       },
+       {
+        "scheduledDeparture": 25800,
+        "serviceDay": 1792533600
+       },
+       {
+        "scheduledDeparture": 33000,
+        "serviceDay": 1792533600
+       },
+       {
+        "scheduledDeparture": 43200,
+        "serviceDay": 1792533600
+       }
+      ]
+     },
+     {
+      "pattern": {
+       "headsign": "Székesfehérvár, Temető",
+       "route": {
+        "gtfsId": "hkir:hkir_V-14827-R-42",
+        "shortName": "42",
+        "mode": "BUS",
+        "agency": {
+         "gtfsId": "hkir:hkir_V-14827"
+        }
+       }
+      },
+      "stoptimes": [
+       {
+        "scheduledDeparture": 46800,
+        "serviceDay": 1792533600
+       },
+       {
+        "scheduledDeparture": 54900,
+        "serviceDay": 1792533600
+       },
+       {
+        "scheduledDeparture": 52200,
+        "serviceDay": 1792533600
+       },
+       {
+        "scheduledDeparture": 43200,
+        "serviceDay": 1792533600
+       },
+       {
+        "scheduledDeparture": 57900,
+        "serviceDay": 1792533600
+       }
+      ]
+     },
+     {
+      "pattern": {
+       "headsign": "Székesfehérvár, Kórház",
+       "route": {
+        "gtfsId": "hkir:hkir_V-14827-R-10",
+        "shortName": "10",
+        "mode": "BUS",
+        "agency": {
+         "gtfsId": "hkir:hkir_V-14827"
+        }
+       }
+      },
+      "stoptimes": [
+       {
+        "scheduledDeparture": 21600,
+        "serviceDay": 1792533600
+       },
+       {
+        "scheduledDeparture": 25200,
+        "serviceDay": 1792533600
+       },
+       {
+        "scheduledDeparture": 28800,
+        "serviceDay": 1792533600
+       }
+      ]
+     },
+     {
+      "pattern": {
+       "headsign": "Székesfehérvár, Temető",
+       "route": {
+        "gtfsId": "hkir:hkir_V-14827-R-12",
+        "shortName": "12",
+        "mode": "BUS",
+        "agency": {
+         "gtfsId": "hkir:hkir_V-14827"
+        }
+       }
+      },
+      "stoptimes": [
+       {
+        "scheduledDeparture": 23400,
+        "serviceDay": 1792533600
+       },
+       {
+        "scheduledDeparture": 34200,
+        "serviceDay": 1792533600
+       }
+      ]
+     },
+     {
+      "pattern": {
+       "headsign": "Székesfehérvár, Kórház",
+       "route": {
+        "gtfsId": "hkir:hkir_V-14827-R-35",
+        "shortName": "35",
+        "mode": "BUS",
+        "agency": {
+         "gtfsId": "hkir:hkir_V-14827"
+        }
+       }
+      },
+      "stoptimes": []
+     }
+    ]
+   }
+  ]
+ }
+}

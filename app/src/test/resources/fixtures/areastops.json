@@ -1,0 +1,100 @@
+{
+ "data": {
+  "stopsByBbox": [
+   {
+    "gtfsId": "hkir:hkir_900101_1",
+    "name": "Székesfehérvár, Fő tér",
+    "lat": 47.19376650986069,
+    "lon": 18.4105,
+    "vehicleMode": "BUS",
+    "platformCode": null
+   },
+   {
+    "gtfsId": "hkir:hkir_900101_2",
+    "name": "Székesfehérvár, Fő tér",
+    "lat": 47.1939,
+    "lon": 18.4108,
+    "vehicleMode": "BUS",
+    "platformCode": null
+   },
+   {
+    "gtfsId": "hkir:hkir_900301_1",
+    "name": "Székesfehérvár, Malom utca",
+    "lat": 47.195,
+    "lon": 18.406,
+    "vehicleMode": "BUS",
+    "platformCode": null
+   },
+   {
+    "gtfsId": "hkir:hkir_900301_2",
+    "name": "Székesfehérvár, Malom utca",
+    "lat": 47.1952,
+    "lon": 18.4058,
+    "vehicleMode": "BUS",
+    "platformCode": null
+   },
+   {
+    "gtfsId": "hkir:hkir_900201_1",
+    "name": "Székesfehérvár, vasútállomás",
+    "lat": 47.1812,
+    "lon": 18.415,
+    "vehicleMode": "BUS",
+    "platformCode": "11"
+   },
+   {
+    "gtfsId": "hkir:hkir_900201_2",
+    "name": "Székesfehérvár, vasútállomás",
+    "lat": 47.1814,
+    "lon": 18.415,
+    "vehicleMode": "BUS",
+    "platformCode": "12"
+   },
+   {
+    "gtfsId": "hkir:hkir_900201_3",
+    "name": "Székesfehérvár, vasútállomás",
+    "lat": 47.181599999999996,
+    "lon": 18.415,
+    "vehicleMode": "BUS",
+    "platformCode": "13"
+   },
+   {
+    "gtfsId": "hkir:hkir_900201_4",
+    "name": "Székesfehérvár, vasútállomás",
+    "lat": 47.181799999999996,
+    "lon": 18.415,
+    "vehicleMode": "BUS",
+    "platformCode": "14"
+   },
+   {
+    "gtfsId": "hkir:hkir_900901_1",
+    "name": "Homokpuszta, bejáró",
+    "lat": 47.121,
+    "lon": 18.462,
+    "vehicleMode": "BUS",
+    "platformCode": null
+   },
+   {
+    "gtfsId": "hkir:hkir_900901_2",
+    "name": "Homokpuszta, bejáró",
+    "lat": 47.1205,
+    "lon": 18.4625,
+    "vehicleMode": "BUS",
+    "platformCode": null
+   },
+   {
+    "gtfsId": "hkir:hkir_900999_1",
+    "name": "Homokpuszta, vasúti megálló",
+    "lat": 47.1212,
+    "lon": 18.4618,
+    "vehicleMode": "RAIL"
+   },
+   {
+    "gtfsId": "mav:mav_009999",
+    "name": "Homokpuszta",
+    "lat": 47.1209,
+    "lon": 18.4621,
+    "vehicleMode": "RAIL"
+   }
+  ]
+ }
+}

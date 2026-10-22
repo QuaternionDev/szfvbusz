@@ -1,0 +1,276 @@
+{
+ "data": {
+  "vehiclePositions": [
+   {
+    "vehicleId": "hkir:veh001",
+    "label": "TST101",
+    "lat": 47.188,
+    "lon": 18.408,
+    "heading": 37,
+    "speed": 6.5,
+    "lastUpdated": 1792645207,
+    "stopRelationship": {
+     "status": "IN_TRANSIT_TO",
+     "stop": {
+      "name": "Székesfehérvár, Malom utca"
+     }
+    },
+    "trip": {
+     "gtfsId": "hkir:hkir_T-10-01",
+     "tripHeadsign": "Székesfehérvár, Kórház",
+     "route": {
+      "gtfsId": "hkir:hkir_V-14827-R-10",
+      "shortName": "10",
+      "mode": "BUS",
+      "agency": {
+       "gtfsId": "hkir:hkir_V-14827"
+      }
+     }
+    }
+   },
+   {
+    "vehicleId": "hkir:veh002",
+    "label": "TST102",
+    "lat": 47.199,
+    "lon": 18.401,
+    "heading": 74,
+    "speed": 7.5,
+    "lastUpdated": 1792645214,
+    "stopRelationship": {
+     "status": "IN_TRANSIT_TO",
+     "stop": {
+      "name": "Székesfehérvár, Malom utca"
+     }
+    },
+    "trip": {
+     "gtfsId": "hkir:hkir_T-10-02",
+     "tripHeadsign": "Székesfehérvár, vasútállomás",
+     "route": {
+      "gtfsId": "hkir:hkir_V-14827-R-10",
+      "shortName": "10",
+      "mode": "BUS",
+      "agency": {
+       "gtfsId": "hkir:hkir_V-14827"
+      }
+     }
+    }
+   },
+   {
+    "vehicleId": "hkir:veh003",
+    "label": "TST103",
+    "lat": 47.192,
+    "lon": 18.415,
+    "heading": 111,
+    "speed": 8.5,
+    "lastUpdated": 1792645221,
+    "stopRelationship": {
+     "status": "IN_TRANSIT_TO",
+     "stop": {
+      "name": "Székesfehérvár, Malom utca"
+     }
+    },
+    "trip": {
+     "gtfsId": "hkir:hkir_T-12-03",
+     "tripHeadsign": "Székesfehérvár, Temető",
+     "route": {
+      "gtfsId": "hkir:hkir_V-14827-R-12",
+      "shortName": "12",
+      "mode": "BUS",
+      "agency": {
+       "gtfsId": "hkir:hkir_V-14827"
+      }
+     }
+    }
+   },
+   {
+    "vehicleId": "hkir:veh004",
+    "label": "TST104",
+    "lat": 47.175,
+    "lon": 18.43,
+    "heading": 148,
+    "speed": 5.5,
+    "lastUpdated": 1792645228,
+    "stopRelationship": {
+     "status": "IN_TRANSIT_TO",
+     "stop": {
+      "name": "Székesfehérvár, Malom utca"
+     }
+    },
+    "trip": {
+     "gtfsId": "hkir:hkir_T-14-04",
+     "tripHeadsign": "Székesfehérvár, Ipari park",
+     "route": {
+      "gtfsId": "hkir:hkir_V-14827-R-14",
+      "shortName": "14",
+      "mode": "BUS",
+      "agency": {
+       "gtfsId": "hkir:hkir_V-14827"
+      }
+     }
+    }
+   },
+   {
+    "vehicleId": "hkir:veh005",
+    "label": "TST105",
+    "lat": 47.205,
+    "lon": 18.43,
+    "heading": 185,
+    "speed": 6.5,
+    "lastUpdated": 1792645235,
+    "stopRelationship": {
+     "status": "IN_TRANSIT_TO",
+     "stop": {
+      "name": "Székesfehérvár, Malom utca"
+     }
+    },
+    "trip": {
+     "gtfsId": "hkir:hkir_T-20-05",
+     "tripHeadsign": "Székesfehérvár, Kertváros",
+     "route": {
+      "gtfsId": "hkir:hkir_V-14827-R-20",
+      "shortName": "20",
+      "mode": "BUS",
+      "agency": {
+       "gtfsId": "hkir:hkir_V-14827"
+      }
+     }
+    }
+   },
+   {
+    "vehicleId": "hkir:veh006",
+    "label": "TST106",
+    "lat": 47.183,
+    "lon": 18.412,
+    "heading": 222,
+    "speed": 7.5,
+    "lastUpdated": 1792645242,
+    "stopRelationship": {
+     "status": "IN_TRANSIT_TO",
+     "stop": {
+      "name": "Székesfehérvár, Sportcsarnok"
+     }
+    },
+    "trip": {
+     "gtfsId": "hkir:hkir_T-35-06",
+     "tripHeadsign": "Székesfehérvár, Kórház",
+     "route": {
+      "gtfsId": "hkir:hkir_V-14827-R-35",
+      "shortName": "35",
+      "mode": "BUS",
+      "agency": {
+       "gtfsId": "hkir:hkir_V-14827"
+      }
+     }
+    }
+   },
+   {
+    "vehicleId": "hkir:veh007",
+    "label": "TST107",
+    "lat": 47.21,
+    "lon": 18.39,
+    "heading": 259,
+    "speed": 8.5,
+    "lastUpdated": 1792645249,
+    "stopRelationship": {
+     "status": "IN_TRANSIT_TO",
+     "stop": {
+      "name": "Székesfehérvár, Malom utca"
+     }
+    },
+    "trip": {
+     "gtfsId": "hkir:hkir_T-42-07",
+     "tripHeadsign": "Székesfehérvár, Autóbusz-állomás",
+     "route": {
+      "gtfsId": "hkir:hkir_V-14827-R-42",
+      "shortName": "42",
+      "mode": "BUS",
+      "agency": {
+       "gtfsId": "hkir:hkir_V-14827"
+      }
+     }
+    }
+   },
+   {
+    "vehicleId": "hkir:veh008",
+    "label": "TST108",
+    "lat": 47.14,
+    "lon": 18.45,
+    "heading": 296,
+    "speed": 5.5,
+    "lastUpdated": 1792645256,
+    "stopRelationship": {
+     "status": "IN_TRANSIT_TO",
+     "stop": {
+      "name": "Székesfehérvár, Malom utca"
+     }
+    },
+    "trip": {
+     "gtfsId": "hkir:hkir_T-7999-08",
+     "tripHeadsign": "Homokpuszta, bejáró",
+     "route": {
+      "gtfsId": "hkir:hkir_V-R-7999",
+      "shortName": "7999",
+      "mode": "COACH",
+      "agency": {
+       "gtfsId": "hkir:hkir_V"
+      }
+     }
+    }
+   },
+   {
+    "vehicleId": "hkir:veh009",
+    "label": "TST109",
+    "lat": 47.23,
+    "lon": 18.35,
+    "heading": 333,
+    "speed": 6.5,
+    "lastUpdated": 1792645263,
+    "stopRelationship": {
+     "status": "IN_TRANSIT_TO",
+     "stop": {
+      "name": "Székesfehérvár, Malom utca"
+     }
+    },
+    "trip": {
+     "gtfsId": "hkir:hkir_T-7998-09",
+     "tripHeadsign": "Kitaláltfalva, templom",
+     "route": {
+      "gtfsId": "hkir:hkir_V-R-7998",
+      "shortName": "7998",
+      "mode": "COACH",
+      "agency": {
+       "gtfsId": "hkir:hkir_V"
+      }
+     }
+    }
+   },
+   {
+    "vehicleId": "hkir:veh010",
+    "label": "TST110",
+    "lat": 47.15,
+    "lon": 18.44,
+    "heading": 10,
+    "speed": 7.5,
+    "lastUpdated": 1792645270,
+    "stopRelationship": {
+     "status": "IN_TRANSIT_TO",
+     "stop": {
+      "name": "Székesfehérvár, Malom utca"
+     }
+    },
+    "trip": {
+     "gtfsId": "hkir:hkir_T-S99-10",
+     "tripHeadsign": "Homokpuszta",
+     "route": {
+      "gtfsId": "mav:mav-R-S99",
+      "shortName": "S99",
+      "mode": "RAIL",
+      "agency": {
+       "gtfsId": "mav:mav"
+      }
+     }
+    }
+   }
+  ]
+ }
+}
