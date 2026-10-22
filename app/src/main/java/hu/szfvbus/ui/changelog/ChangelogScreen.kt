@@ -60,15 +60,13 @@ val RELEASES = listOf(
             ),
             new(
                 "Tájékoztatás arról, hogy Székesfehérváron most kezdődött a buszok fedélzeti egységeinek (OBU) " +
-                    "beszerzése, így még nem minden busz követhető élőben. A térképen egy kis sárga " +
-                    "felkiáltójel mindig újra megnyitja.",
+                    "beszerzése, így még nem minden busz követhető élőben.",
             ),
             improved(
                 "Pontosabb szövegek: a vonalnál, a térkép összesítőjében és a járatnál azt írja, hány busz " +
                     "látszik élőben, és nem azt, hogy „nem közlekedik jármű”, hiszen a nem látható buszok is " +
                     "közlekedhetnek.",
             ),
-            improved("A forráskód kommentjei magyarul, a GitHubos közzétételhez."),
             new("Fejlesztői mód: az indítási figyelmeztetések újrajátszása."),
         ),
     ),
