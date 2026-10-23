@@ -52,6 +52,16 @@ private fun fixed(text: String) = Change(ChangeKind.FIXED, text)
 /** Az eddigi összes verzió, a legújabb elöl. Az első mindig az éppen készülő verzió. */
 val RELEASES = listOf(
     Release(
+        "0.5.1",
+        listOf(
+            improved(
+                "Éjszakai üzenet hozzáadása a busz számlálóhoz.",
+            ),
+            improved(
+                "Alkalmazás egyes szövegeinek finomítása.",
+            ),
+        ),
+
         "0.5.0",
         listOf(
             new(

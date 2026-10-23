@@ -613,7 +613,7 @@ private fun TopBar(
                 Row(Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.CloudOff, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(6.dp))
-                    Text("Nincs kapcsolat, újrapróbálás…", style = MaterialTheme.typography.labelMedium)
+                    Text("Nincs kapcsolat, újrapróbálkozás…", style = MaterialTheme.typography.labelMedium)
                 }
             }
         }

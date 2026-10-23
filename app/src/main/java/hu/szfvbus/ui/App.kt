@@ -149,7 +149,7 @@ fun SzfvBusAppUi(openAlertsRequests: StateFlow<Int> = MutableStateFlow(0)) {
                 hasLocation = true
                 locationVersion++
                 if (tab == Tab.MAP && !mapVm.centerOnMyLocation()) {
-                    Toast.makeText(context, "Helyzet meghatározása folyamatban…", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Helymeghatározás folyamatban…", Toast.LENGTH_SHORT).show()
                 }
             } else {
                 permissionLauncher.launch(

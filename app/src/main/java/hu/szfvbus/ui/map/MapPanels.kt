@@ -579,7 +579,7 @@ fun LinePanel(
             }
             val pattern = mains.getOrNull(direction) ?: mains.firstOrNull()
             if (pattern == null) {
-                item { EmptyBox("A vonalnak ma nincs menete.") }
+                item { EmptyBox("Ez a vonal ma nem közlekedik.") }
             } else {
                 item {
                     Text(

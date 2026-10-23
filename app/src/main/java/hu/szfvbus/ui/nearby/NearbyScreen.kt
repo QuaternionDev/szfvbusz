@@ -162,7 +162,7 @@ fun NearbyScreen(
             ) {
                 Icon(Icons.Default.LocationOff, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                 Text(
-                    "A közeli indulásokhoz engedélyezd a helymeghatározást.",
+                    "A közeli indulások megtekintéséhez engedélyezd a helymeghatározást.",
                     modifier = Modifier.padding(vertical = 16.dp),
                 )
                 Button(onClick = onRequestLocation) { Text("Engedélyezés") }
