@@ -55,6 +55,10 @@ val RELEASES = listOf(
         "0.5.1",
         listOf(
             new(
+                "Értesítés új verzióról: induláskor, naponta legfeljebb egyszer megnézi a GitHubon, van-e újabb " +
+                    "kiadás. A menüben kikapcsolható.",
+            ),
+            new(
                 "Hibajelentés gomb hozzáadása a fejlesztői beállításokhoz.",
             ),
             improved(

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -26,6 +27,10 @@ data class Prefs(
     val devMode: Boolean = false,
     /** Az indítási figyelmeztetések, amelyeknél a „Ne mutasd újra” gombot választották. */
     val hiddenNotices: Set<String> = emptySet(),
+    /** Induláskor (naponta legfeljebb egyszer) megnézi, van-e új verzió a GitHubon. */
+    val checkUpdates: Boolean = true,
+    /** A verzió, amelynél a „Kihagyom” gombot választották; erről nem szól többet. */
+    val skippedVersion: String? = null,
 )
 
 enum class ThemeMode(val label: String) {
@@ -43,6 +48,9 @@ class UserPrefs(private val context: Context) {
     private val devModeKey = booleanPreferencesKey("dev_mode")
     private val seenAlertsKey = stringSetPreferencesKey("seen_alerts")
     private val hiddenNoticesKey = stringSetPreferencesKey("hidden_notices")
+    private val checkUpdatesKey = booleanPreferencesKey("check_updates")
+    private val skippedVersionKey = stringPreferencesKey("skipped_version")
+    private val lastUpdateCheckKey = longPreferencesKey("last_update_check")
 
     val prefs: Flow<Prefs> = context.dataStore.data.map { p ->
         Prefs(
@@ -53,6 +61,8 @@ class UserPrefs(private val context: Context) {
             notifyAlerts = p[notifyKey] ?: true,
             devMode = p[devModeKey] ?: false,
             hiddenNotices = p[hiddenNoticesKey].orEmpty(),
+            checkUpdates = p[checkUpdatesKey] ?: true,
+            skippedVersion = p[skippedVersionKey],
         )
     }
 
@@ -80,6 +90,21 @@ class UserPrefs(private val context: Context) {
 
     suspend fun setNotifyAlerts(value: Boolean) {
         context.dataStore.edit { it[notifyKey] = value }
+    }
+
+    suspend fun setCheckUpdates(value: Boolean) {
+        context.dataStore.edit { it[checkUpdatesKey] = value }
+    }
+
+    suspend fun setSkippedVersion(version: String?) {
+        context.dataStore.edit { if (version == null) it.remove(skippedVersionKey) else it[skippedVersionKey] = version }
+    }
+
+    /** A legutóbbi sikeres frissítéskeresés ideje (epoch ms), vagy 0. */
+    suspend fun lastUpdateCheck(): Long = context.dataStore.data.first()[lastUpdateCheckKey] ?: 0
+
+    suspend fun setLastUpdateCheck(epochMs: Long) {
+        context.dataStore.edit { it[lastUpdateCheckKey] = epochMs }
     }
 
     suspend fun setDevMode(value: Boolean) {

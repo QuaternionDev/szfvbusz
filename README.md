@@ -60,6 +60,9 @@ A felhasználó helyzetét kizárólag az útvonaltervező küldi el (a kiindul�
 A vonalak és megállók, a környék összes buszmegállója és a hírek
 szövege a telefonon tárolódik (az előbbiek egy napig).
 
+Az alkalmazás induláskor, naponta legfeljebb egyszer megnézi a GitHubon, van-e új verzió;
+ilyenkor a GitHub látja a telefon IP-címét. A menüben az „Új verzió keresése” pont kikapcsolja.
+
 > [!IMPORTANT]
 > **Nem hivatalos alkalmazás.** Az SzfvBusz független projekt, nem a MÁV-csoport vagy a
 > Volánbusz terméke, és nem áll kapcsolatban velük. Az adatokat a MÁV Plusz webes

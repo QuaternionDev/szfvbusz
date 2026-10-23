@@ -295,6 +295,9 @@ fun DevScreen(vm: MapViewModel, onBack: () -> Unit, onOpenAlerts: () -> Unit) {
                             vm.loadNetwork(force = true)
                             toast("Vonalak és megállók letöltése…")
                         }
+                        SmallButton("Frissítés keresése most") {
+                            vm.checkForUpdate(force = true) { toast(it) }
+                        }
                         SmallButton("Tesztek alaphelyzetbe") {
                             DevTools.reset()
                             DevClock.reset()

@@ -64,6 +64,7 @@ import hu.szfvbus.ui.map.MapViewModel
 import hu.szfvbus.ui.map.Selection
 import hu.szfvbus.ui.nearby.NearbyScreen
 import hu.szfvbus.ui.notice.LaunchNoticeDialog
+import hu.szfvbus.ui.notice.UpdateDialog
 import hu.szfvbus.ui.planner.Endpoint
 import hu.szfvbus.ui.planner.PlannerScreen
 import hu.szfvbus.ui.planner.PlannerViewModel
@@ -132,6 +133,7 @@ fun SzfvBusAppUi(openAlertsRequests: StateFlow<Int> = MutableStateFlow(0)) {
         val launchNotices by mapVm.launchNotices.collectAsStateWithLifecycle()
         val closedNotices by mapVm.closedNoticeCount.collectAsStateWithLifecycle()
         val selection by mapVm.selection.collectAsStateWithLifecycle()
+        val update by mapVm.update.collectAsStateWithLifecycle()
         // A térkép sárga jelével kézzel megnyitott figyelmeztetés.
         var openedNotice by remember { mutableStateOf<LaunchNotice?>(null) }
 
@@ -335,9 +337,11 @@ fun SzfvBusAppUi(openAlertsRequests: StateFlow<Int> = MutableStateFlow(0)) {
             }
         }
 
-        // Az indítási figyelmeztetések egymás után jönnek; utazás közben nem ugranak fel.
+        // Az indítási figyelmeztetések egymás után jönnek, utánuk a frissítés; utazás közben nem ugranak fel.
         val opened = openedNotice
-        val queued = launchNotices.firstOrNull()?.takeIf { selection !is Selection.Ride }
+        val riding = selection is Selection.Ride
+        val queued = launchNotices.firstOrNull()?.takeIf { !riding }
+        val pendingUpdate = update?.takeIf { !riding }
         when {
             opened != null -> LaunchNoticeDialog(
                 notice = opened,
@@ -361,6 +365,11 @@ fun SzfvBusAppUi(openAlertsRequests: StateFlow<Int> = MutableStateFlow(0)) {
                     onHide = { mapVm.hideNotice(queued.id) },
                 )
             }
+            pendingUpdate != null -> UpdateDialog(
+                release = pendingUpdate,
+                onLater = mapVm::dismissUpdate,
+                onSkip = { mapVm.skipUpdate(pendingUpdate) },
+            )
         }
     }
 }

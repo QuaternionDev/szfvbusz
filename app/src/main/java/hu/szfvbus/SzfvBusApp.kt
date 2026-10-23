@@ -8,6 +8,7 @@ import hu.szfvbus.data.UserPrefs
 import hu.szfvbus.data.api.GeocoderClient
 import hu.szfvbus.data.api.MavinformClient
 import hu.szfvbus.data.api.OtpClient
+import hu.szfvbus.data.api.UpdateClient
 import hu.szfvbus.notify.AlertCheckWorker
 import kotlinx.serialization.json.Json
 import okhttp3.Cache
@@ -42,6 +43,7 @@ class AppContainer(context: Context) {
     val transit = TransitRepository(OtpClient(http, json), GeocoderClient(http, json), MavinformClient(http), context.filesDir)
     val prefs = UserPrefs(context)
     val location = LocationRepository(context)
+    val updates = UpdateClient(http, json)
 }
 
 class SzfvBusApp : Application() {

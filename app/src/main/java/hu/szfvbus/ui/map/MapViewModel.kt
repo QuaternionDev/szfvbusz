@@ -3,11 +3,14 @@ package hu.szfvbus.ui.map
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import hu.szfvbus.AppContainer
+import hu.szfvbus.BuildConfig
 import hu.szfvbus.data.DevTools
 import hu.szfvbus.data.LineColors
 import hu.szfvbus.data.Prefs
 import hu.szfvbus.data.ThemeMode
 import hu.szfvbus.data.VehicleSimulator
+import hu.szfvbus.data.api.AppRelease
+import hu.szfvbus.data.api.UpdateClient
 import hu.szfvbus.data.model.Alert
 import hu.szfvbus.data.model.Departure
 import hu.szfvbus.data.model.GeoPoint
@@ -73,6 +76,7 @@ class MapViewModel(container: AppContainer) : ViewModel() {
     private val repo = container.transit
     private val userPrefs = container.prefs
     private val locationRepo = container.location
+    private val updateClient = container.updates
     private val simulator = VehicleSimulator(repo)
 
     // Egyszer, előre beolvasva, hogy a választott téma villanás nélkül, az első képkockától érvényes legyen.
@@ -143,6 +147,10 @@ class MapViewModel(container: AppContainer) : ViewModel() {
     val closedNoticeCount: StateFlow<Int> = closedNotices.map { it.size }
         .stateIn(viewModelScope, SharingStarted.Eagerly, 0)
 
+    /** Az elérhető újabb verzió a GitHubon, amíg a felhasználó be nem zárja az értesítést. */
+    private val _update = MutableStateFlow<AppRelease?>(null)
+    val update = _update.asStateFlow()
+
     private val _myLocation = MutableStateFlow<GeoPoint?>(null)
     val myLocation = _myLocation.asStateFlow()
 
@@ -165,6 +173,7 @@ class MapViewModel(container: AppContainer) : ViewModel() {
 
     init {
         loadNetwork()
+        checkForUpdate()
         viewModelScope.launch {
             DevTools.state.map { it.simulateVehicles }.distinctUntilChanged().collect { on ->
                 if (!on) simulator.clear()
@@ -521,6 +530,46 @@ class MapViewModel(container: AppContainer) : ViewModel() {
         viewModelScope.launch { userPrefs.setNotifyAlerts(on) }
     }
 
+    fun setCheckUpdates(on: Boolean) {
+        viewModelScope.launch { userPrefs.setCheckUpdates(on) }
+    }
+
+    /**
+     * Megnézi, van-e újabb verzió a GitHubon: naponta legfeljebb egyszer, és a kihagyott verzióról nem
+     * szól. A [force] (fejlesztői mód) mindkettőt figyelmen kívül hagyja, az [onResult] az eredményt kapja.
+     */
+    fun checkForUpdate(force: Boolean = false, onResult: ((String) -> Unit)? = null) {
+        viewModelScope.launch {
+            val p = userPrefs.prefs.first()
+            // Valós idő, nem a fejlesztői óra: az eltolt idő ne indítson felesleges kéréseket.
+            val nowMs = System.currentTimeMillis()
+            if (!force && (!p.checkUpdates || nowMs - userPrefs.lastUpdateCheck() < UPDATE_CHECK_INTERVAL_MS)) return@launch
+            val release = try {
+                updateClient.latest()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                onResult?.invoke("Nem sikerült elérni a GitHubot")
+                return@launch
+            }
+            userPrefs.setLastUpdateCheck(nowMs)
+            val newer = UpdateClient.isNewer(release.version, BuildConfig.VERSION_NAME)
+            if (newer && (force || release.version != p.skippedVersion)) _update.value = release
+            onResult?.invoke(if (newer) "Elérhető: ${release.tag}" else "Nincs újabb verzió (legfrissebb: ${release.tag})")
+        }
+    }
+
+    /** „Később”: a következő napi ellenőrzéskor újra szól. */
+    fun dismissUpdate() {
+        _update.value = null
+    }
+
+    /** „Kihagyom”: erről a verzióról többet nem szól, csak a következőről. */
+    fun skipUpdate(release: AppRelease) {
+        _update.value = null
+        viewModelScope.launch { userPrefs.setSkippedVersion(release.version) }
+    }
+
     fun setDevMode(on: Boolean) {
         if (!on) DevTools.reset()
         viewModelScope.launch { userPrefs.setDevMode(on) }
@@ -648,6 +697,7 @@ class MapViewModel(container: AppContainer) : ViewModel() {
         const val TRIP_POLL_MS = 15_000L
         const val RIDE_POLL_MS = 10_000L
         const val ALERTS_POLL_MS = 10 * 60_000L
+        const val UPDATE_CHECK_INTERVAL_MS = 24 * 60 * 60_000L
         const val WALK_COLOR = 0xFF607D8B.toInt()
         const val START_COLOR = 0xFF2E7D32.toInt()
         const val END_COLOR = 0xFFC62828.toInt()

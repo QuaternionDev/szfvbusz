@@ -271,6 +271,7 @@ fun MapScreen(
                     TopBar(
                         showIntercity = prefs.showIntercity,
                         notifyAlerts = prefs.notifyAlerts,
+                        checkUpdates = prefs.checkUpdates,
                         devMode = prefs.devMode,
                         // Minden óraütéskor újraolvasva.
                         devStatus = if (prefs.devMode && now > 0) devStatusText() else null,
@@ -278,6 +279,7 @@ fun MapScreen(
                         onSearch = onOpenSearch,
                         onToggleIntercity = { vm.setShowIntercity(!prefs.showIntercity) },
                         onToggleNotify = { vm.setNotifyAlerts(!prefs.notifyAlerts) },
+                        onToggleUpdates = { vm.setCheckUpdates(!prefs.checkUpdates) },
                         onAlerts = onOpenAlerts,
                         onTheme = { showTheme = true },
                         onDev = onOpenDev,
@@ -478,12 +480,14 @@ private fun AboutText() {
 private fun TopBar(
     showIntercity: Boolean,
     notifyAlerts: Boolean,
+    checkUpdates: Boolean,
     devMode: Boolean,
     devStatus: String?,
     offline: Boolean,
     onSearch: () -> Unit,
     onToggleIntercity: () -> Unit,
     onToggleNotify: () -> Unit,
+    onToggleUpdates: () -> Unit,
     onAlerts: () -> Unit,
     onTheme: () -> Unit,
     onDev: () -> Unit,
@@ -546,6 +550,14 @@ private fun TopBar(
                         onClick = {
                             menuOpen = false
                             onToggleNotify()
+                        },
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Új verzió keresése") },
+                        leadingIcon = { Checkbox(checked = checkUpdates, onCheckedChange = null) },
+                        onClick = {
+                            menuOpen = false
+                            onToggleUpdates()
                         },
                     )
                     DropdownMenuItem(
