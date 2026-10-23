@@ -54,6 +54,9 @@ val RELEASES = listOf(
     Release(
         "0.5.1",
         listOf(
+            new(
+                "Hibajelentés gomb hozzáadása a fejlesztői beállításokhoz.",
+            ),
             improved(
                 "Éjszakai üzenet hozzáadása a busz számlálóhoz.",
             ),
@@ -61,7 +64,8 @@ val RELEASES = listOf(
                 "Alkalmazás egyes szövegeinek finomítása.",
             ),
         ),
-
+    ),
+    Release(
         "0.5.0",
         listOf(
             new(
