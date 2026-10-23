@@ -86,6 +86,7 @@ import hu.szfvbus.data.model.Alert
 import hu.szfvbus.ui.common.AlertBanner
 import hu.szfvbus.ui.common.forLine
 import hu.szfvbus.util.TimeUtil
+import java.time.LocalTime
 import kotlin.math.roundToInt
 
 @Composable
@@ -174,11 +175,15 @@ fun OverviewPanel(
     LazyColumn(Modifier.fillMaxWidth()) {
         item {
             val local = vehicles.count { it.isLocal }
+            val now = TimeUtil.nowDateTime().toLocalTime()
+            val night = now >= LocalTime.of(1, 0) && now < LocalTime.of(4, 30)
             PanelHeader(
                 title = "Székesfehérvár élőben",
                 subtitle = when {
                     error != null && updatedAt == null -> "Nem sikerült lekérni a járműveket"
                     updatedAt == null -> "Járművek betöltése…"
+                    local == 0 && night -> "Éjszaka nem járnak a helyi buszok, jó éjszakát!"
+                    local == 0 -> "Most egy helyi busz sem látszik élőben a térképen"
                     else -> "$local helyi busz látszik élőben · frissítve ${TimeUtil.clock(updatedAt)}"
                 },
             )
