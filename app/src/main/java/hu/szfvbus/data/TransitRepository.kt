@@ -650,7 +650,7 @@ class TransitRepository(
         private const val DEFAULT_WALK_RELUCTANCE = 2.0
         private const val LEAST_WALK_RELUCTANCE = 8.0
         private const val ALERTS_MAX_AGE_MS = 5L * 60 * 1000
-        private const val MAX_NEARBY_STOPS = 40
+        private const val MAX_NEARBY_STOPS = 60
         private val cacheJson = Json { ignoreUnknownKeys = true }
     }
 }

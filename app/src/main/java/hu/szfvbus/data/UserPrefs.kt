@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
@@ -31,7 +32,13 @@ data class Prefs(
     val checkUpdates: Boolean = true,
     /** A verzió, amelynél a „Kihagyom” gombot választották; erről nem szól többet. */
     val skippedVersion: String? = null,
+    /** A Közelben fül keresési sugara méterben, a [NEARBY_RADII] egyike. */
+    val nearbyRadiusM: Int = DEFAULT_NEARBY_RADIUS,
 )
+
+/** A Közelben fülön választható keresési sugarak méterben. */
+val NEARBY_RADII = listOf(300, 500, 700, 1000, 1500)
+const val DEFAULT_NEARBY_RADIUS = 700
 
 enum class ThemeMode(val label: String) {
     SYSTEM("Rendszer szerint"),
@@ -51,6 +58,7 @@ class UserPrefs(private val context: Context) {
     private val checkUpdatesKey = booleanPreferencesKey("check_updates")
     private val skippedVersionKey = stringPreferencesKey("skipped_version")
     private val lastUpdateCheckKey = longPreferencesKey("last_update_check")
+    private val nearbyRadiusKey = intPreferencesKey("nearby_radius")
 
     val prefs: Flow<Prefs> = context.dataStore.data.map { p ->
         Prefs(
@@ -63,6 +71,7 @@ class UserPrefs(private val context: Context) {
             hiddenNotices = p[hiddenNoticesKey].orEmpty(),
             checkUpdates = p[checkUpdatesKey] ?: true,
             skippedVersion = p[skippedVersionKey],
+            nearbyRadiusM = p[nearbyRadiusKey]?.takeIf { it in NEARBY_RADII } ?: DEFAULT_NEARBY_RADIUS,
         )
     }
 
@@ -105,6 +114,10 @@ class UserPrefs(private val context: Context) {
 
     suspend fun setLastUpdateCheck(epochMs: Long) {
         context.dataStore.edit { it[lastUpdateCheckKey] = epochMs }
+    }
+
+    suspend fun setNearbyRadius(meters: Int) {
+        context.dataStore.edit { it[nearbyRadiusKey] = meters }
     }
 
     suspend fun setDevMode(value: Boolean) {
