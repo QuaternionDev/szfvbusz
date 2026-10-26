@@ -52,6 +52,23 @@ private fun fixed(text: String) = Change(ChangeKind.FIXED, text)
 /** Az eddigi összes verzió, a legújabb elöl. Az első mindig az éppen készülő verzió. */
 val RELEASES = listOf(
     Release(
+        "0.5.2",
+        listOf(
+            new(
+                "Közelben fül: választható keresési távolság (300 m, 500 m, 700 m, 1 km vagy 1,5 km). " +
+                    "A választás megmarad.",
+            ),
+            new(
+                "Kedvenc irány: egy megállónak csak az egyik iránya is a kedvencek közé tehető, az iránya melletti " +
+                    "☆ gombbal a megálló paneljén vagy a Közelben fülön. A Kedvencekben saját kártyán látszik.",
+            ),
+            new(
+                "Fejlesztői mód: utazásteszt, amellyel a felszállás a megállóban várakozástól a leszállásig " +
+                    "kipróbálható, szimulált busszal, helyzettel és gyorsított idővel.",
+            ),
+        ),
+    ),
+    Release(
         "0.5.1",
         listOf(
             new(
