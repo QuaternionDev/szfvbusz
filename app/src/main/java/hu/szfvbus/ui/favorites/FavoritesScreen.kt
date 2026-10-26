@@ -68,7 +68,11 @@ data class FavoriteStop(
     val departures: Load<List<DirectionGroup>>,
     /** Kocsiállás-feliratok megálló-azonosító szerint, az állomásokon. */
     val platforms: Map<String, String> = emptyMap(),
-)
+    /** Kedvenc iránynál a tárolt peron azonosítója; ilyenkor a [departures] egyetlen irány. */
+    val directionId: String? = null,
+) {
+    val key get() = if (directionId == null) "s-$name" else "d-$directionId"
+}
 
 class FavoritesViewModel(container: AppContainer) : ViewModel() {
     private val repo = container.transit
@@ -81,17 +85,19 @@ class FavoritesViewModel(container: AppContainer) : ViewModel() {
     suspend fun refreshLoop() {
         userPrefs.prefs.collectLatest { p ->
             val names = p.favoriteStops.sorted()
+            val previous = _stops.value
+            // Az irányok neve csak a hálózatból derül ki, ezért az új irányok a frissítéssel jelennek meg.
             _stops.value = names.map { name ->
-                FavoriteStop(name, _stops.value.firstOrNull { it.name == name }?.departures ?: Load.Loading)
-            }
+                FavoriteStop(name, previous.firstOrNull { it.key == "s-$name" }?.departures ?: Load.Loading)
+            } + previous.filter { it.directionId != null && it.directionId in p.favoriteDirections }
             while (true) {
-                refresh(names, p.showIntercity)
+                refresh(names, p.favoriteDirections, p.showIntercity)
                 delay(30_000)
             }
         }
     }
 
-    private suspend fun refresh(names: List<String>, showIntercity: Boolean) = coroutineScope {
+    private suspend fun refresh(names: List<String>, directionIds: Set<String>, showIntercity: Boolean) = coroutineScope {
         val net = try {
             repo.network()
         } catch (e: CancellationException) {
@@ -99,7 +105,31 @@ class FavoritesViewModel(container: AppContainer) : ViewModel() {
         } catch (e: Exception) {
             return@coroutineScope
         }
-        _stops.value = names.map { name ->
+        val directions = directionIds.map { id ->
+            async {
+                val stop = net.stops[id]
+                val group = stop?.let { net.group(it.name) }
+                val result: Load<List<DirectionGroup>> = if (group == null) {
+                    Load.Error("A megálló már nem szerepel a hálózatban")
+                } else {
+                    try {
+                        val departures = repo.departures(group.sameDirection(listOf(id)), count = 4, rangeSec = 12 * 3600)
+                            .filter { showIntercity || it.isLocal }
+                        // A tárolt peron iránya kerül előre; ha arra éppen nem indul semmi, üresen is ott van.
+                        val direction = directionGroups(departures, net.stops, firstStopId = id).firstOrNull()
+                        Load.Success(listOfNotNull(direction?.copy(departures = direction.departures.take(4))))
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        _stops.value.firstOrNull { it.directionId == id }?.departures?.takeIf { it is Load.Success }
+                            ?: Load.Error("Nem sikerült frissíteni")
+                    }
+                }
+                val platforms = group?.stops.orEmpty().mapNotNull { s -> s.platformLabel?.let { s.id to it } }.toMap()
+                FavoriteStop(stop?.name ?: "Ismeretlen megálló", result, platforms, directionId = id)
+            }
+        }
+        val stops = names.map { name ->
             async {
                 val group = net.group(name)
                 val result: Load<List<DirectionGroup>> = if (group == null) {
@@ -121,11 +151,21 @@ class FavoritesViewModel(container: AppContainer) : ViewModel() {
                 val platforms = group?.stops.orEmpty().mapNotNull { s -> s.platformLabel?.let { s.id to it } }.toMap()
                 FavoriteStop(name, result, platforms)
             }
-        }.awaitAll()
+        }
+        // Név szerint, egy megállón belül az egész megálló elöl, utána az irányai.
+        _stops.value = (stops.awaitAll() + directions.awaitAll()).sortedWith(
+            compareBy<FavoriteStop> { it.name }
+                .thenBy { it.directionId != null }
+                .thenBy { (it.departures as? Load.Success)?.data?.firstOrNull()?.label },
+        )
     }
 
     fun removeStop(name: String) {
         viewModelScope.launch { userPrefs.toggleFavoriteStop(name) }
+    }
+
+    fun removeDirection(stopId: String) {
+        viewModelScope.launch { userPrefs.toggleFavoriteDirection(listOf(stopId)) }
     }
 }
 
@@ -160,12 +200,24 @@ fun FavoritesScreen(
             if (stops.isEmpty() && favoriteLines.isEmpty()) {
                 item {
                     EmptyBox(
-                        "Még nincs kedvenced.\nEgy megálló vagy vonal paneljén a ☆ gombbal adhatsz hozzá.",
+                        "Még nincs kedvenced.\nEgy megálló vagy vonal paneljén a ☆ gombbal adhatsz hozzá, " +
+                            "egy megállónak csak az egyik irányát pedig az iránya melletti ☆ gombbal.",
                     )
                 }
             }
             if (stops.isNotEmpty()) item { SectionHeader("Megállók") }
-            items(stops, key = { "s-" + it.name }) { fav ->
+            items(stops, key = { it.key }) { fav ->
+                if (fav.directionId != null) {
+                    FavoriteDirectionCard(
+                        fav,
+                        now,
+                        onStopGroup = onStopGroup,
+                        onDeparture = onDeparture,
+                        onBoard = onBoard,
+                        onRemove = { vm.removeDirection(fav.directionId) },
+                    )
+                    return@items
+                }
                 Card(
                     Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
@@ -229,6 +281,73 @@ fun FavoritesScreen(
                     LineBadge(line.shortName, Color(line.color), Modifier.width(52.dp))
                     Spacer(Modifier.width(14.dp))
                     Text(line.longName, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                }
+            }
+        }
+    }
+}
+
+/** Egy megálló egyetlen kedvenc iránya: a megálló neve, alatta az irány a csillaggal és az indulásai. */
+@Composable
+private fun FavoriteDirectionCard(
+    fav: FavoriteStop,
+    now: Long,
+    onStopGroup: (name: String, stopId: String?) -> Unit,
+    onDeparture: (Departure) -> Unit,
+    onBoard: (Departure) -> Unit,
+    onRemove: () -> Unit,
+) {
+    Card(
+        Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+    ) {
+        Text(
+            fav.name,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.fillMaxWidth()
+                .clickable { onStopGroup(fav.name, fav.directionId) }
+                .padding(16.dp),
+        )
+        when (val d = fav.departures) {
+            Load.Loading -> LoadingBox()
+            is Load.Error -> Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    d.message,
+                    modifier = Modifier.weight(1f).padding(16.dp),
+                    color = MaterialTheme.colorScheme.error,
+                )
+                IconButton(onClick = onRemove) {
+                    Icon(Icons.Default.Star, contentDescription = "Eltávolítás", tint = Color(0xFFFFB300))
+                }
+            }
+            is Load.Success -> {
+                val direction = d.data.firstOrNull()
+                DirectionHeader(
+                    direction?.label ?: "Indulások erről a peronról",
+                    direction?.platforms.orEmpty(),
+                    onClick = { onStopGroup(fav.name, fav.directionId) },
+                    isFavorite = true,
+                    onFavorite = onRemove,
+                )
+                if (direction == null || direction.departures.isEmpty()) {
+                    Text(
+                        "Erre a következő órákban nem indul járat.",
+                        modifier = Modifier.padding(16.dp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                } else {
+                    direction.departures.forEach { dep ->
+                        DepartureRow(
+                            dep,
+                            now,
+                            onClick = { onDeparture(dep) },
+                            onBoard = { onBoard(dep) },
+                            platform = fav.platforms[dep.stopId].takeIf { direction.platforms.size > 1 },
+                        )
+                    }
                 }
             }
         }

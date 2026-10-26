@@ -94,6 +94,16 @@ data class StopGroup(val name: String, val stops: List<Stop>) {
     val ids get() = stops.map { it.id }
     val lines get() = stops.flatMap { it.lines }.distinct().sortedWith(LineNameComparator)
     val center get() = GeoPoint(stops.map { it.lat }.average(), stops.map { it.lon }.average())
+
+    /**
+     * Az [ids] peronok iránya ebben a megállóban: ezek és a velük azonos irányba induló többi peron,
+     * azonosító szerint rendezve. Egy kedvenc irány így akkor is megmarad, ha az irány peronjai közül
+     * éppen csak az egyikről indul busz.
+     */
+    fun sameDirection(ids: Collection<String>): List<String> {
+        val labels = stops.filter { it.id in ids }.mapNotNull { it.directionLabel }.toSet()
+        return stops.filter { it.id in ids || it.directionLabel in labels }.map { it.id }
+    }
 }
 
 /** A város statikus hálózati adatai: a helyi vonalak és minden megálló, amelyet érintenek. */

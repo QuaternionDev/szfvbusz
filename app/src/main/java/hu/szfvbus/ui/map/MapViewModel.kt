@@ -514,6 +514,10 @@ class MapViewModel(container: AppContainer) : ViewModel() {
         viewModelScope.launch { userPrefs.toggleFavoriteStop(name) }
     }
 
+    fun toggleFavoriteDirection(stopIds: List<String>) {
+        viewModelScope.launch { userPrefs.toggleFavoriteDirection(stopIds) }
+    }
+
     fun toggleFavoriteLine(routeId: String) {
         viewModelScope.launch { userPrefs.toggleFavoriteLine(routeId) }
     }

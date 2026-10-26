@@ -46,6 +46,7 @@ import hu.szfvbus.data.NEARBY_RADII
 import hu.szfvbus.data.model.Departure
 import hu.szfvbus.data.model.GeoPoint
 import hu.szfvbus.data.model.DirectionGroup
+import hu.szfvbus.data.model.StopGroup
 import hu.szfvbus.data.model.directionGroups
 import hu.szfvbus.ui.common.DepartureRow
 import hu.szfvbus.ui.common.DirectionHeader
@@ -76,8 +77,14 @@ data class NearbyGroup(
     val directions: List<DirectionGroup>,
     /** Kocsiállás-feliratok megálló-azonosító szerint, az állomásokon. */
     val platforms: Map<String, String> = emptyMap(),
+    /** A megálló összes peronja, a kedvenc irányokhoz. */
+    val stopGroup: StopGroup? = null,
 ) {
     fun platformOf(departure: Departure): String? = platforms[departure.stopId]
+
+    /** Egy irány összes peronja, ahogy a kedvenc irányok tárolják. */
+    fun directionIds(direction: DirectionGroup): List<String> =
+        stopGroup?.sameDirection(direction.stopIds) ?: direction.stopIds.sorted()
 }
 
 class NearbyViewModel(container: AppContainer) : ViewModel() {
@@ -93,6 +100,8 @@ class NearbyViewModel(container: AppContainer) : ViewModel() {
 
     private val radiusFlow = prefs.prefs.map { it.nearbyRadiusM }.distinctUntilChanged()
     val radius = radiusFlow.stateIn(viewModelScope, SharingStarted.Eagerly, DEFAULT_NEARBY_RADIUS)
+    val favoriteDirections = prefs.prefs.map { it.favoriteDirections }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptySet())
 
     /** 30 másodpercenként frissít; ha a sugár változik, a régi kör megszakad és azonnal újrakezdi. */
     suspend fun refreshLoop() {
@@ -102,6 +111,10 @@ class NearbyViewModel(container: AppContainer) : ViewModel() {
                 delay(30_000)
             }
         }
+    }
+
+    fun toggleFavoriteDirection(stopIds: List<String>) {
+        viewModelScope.launch { prefs.toggleFavoriteDirection(stopIds) }
     }
 
     fun setRadius(meters: Int) {
@@ -126,6 +139,7 @@ class NearbyViewModel(container: AppContainer) : ViewModel() {
                 }
             val showIntercity = prefs.prefs.first().showIntercity
             val stops = repo.nearby(here, radiusM, includeIntercity = showIntercity)
+            val net = repo.network()
             val groups = stops.groupBy { it.stop.name }.map { (name, list) ->
                 val departures = list.flatMap { it.departures }
                     .filter { showIntercity || it.isLocal }
@@ -136,6 +150,7 @@ class NearbyViewModel(container: AppContainer) : ViewModel() {
                     directions = directionGroups(departures, list.associate { it.stop.id to it.stop })
                         .map { it.copy(departures = it.departures.take(3)) },
                     platforms = list.mapNotNull { n -> n.stop.platformLabel?.let { n.stop.id to it } }.toMap(),
+                    stopGroup = net.group(name),
                 )
             }.filter { it.directions.isNotEmpty() }.sortedBy { it.distanceM }
             _state.value = Load.Success(groups)
@@ -160,6 +175,7 @@ fun NearbyScreen(
     val state by vm.state.collectAsStateWithLifecycle()
     val needsPermission by vm.needsPermission.collectAsStateWithLifecycle()
     val radius by vm.radius.collectAsStateWithLifecycle()
+    val favoriteDirections by vm.favoriteDirections.collectAsStateWithLifecycle()
     val now = rememberNow()
     val lifecycleOwner = LocalLifecycleOwner.current
     LaunchedEffect(permissionVersion) {
@@ -231,10 +247,13 @@ fun NearbyScreen(
                                 )
                             }
                             group.directions.forEach { direction ->
+                                val ids = group.directionIds(direction)
                                 DirectionHeader(
                                     direction.label,
                                     direction.platforms,
                                     onClick = { onStopGroup(group.name, direction.stopIds.first()) },
+                                    isFavorite = ids.any { it in favoriteDirections },
+                                    onFavorite = { vm.toggleFavoriteDirection(ids) },
                                 )
                                 direction.departures.forEach { dep ->
                                     DepartureRow(

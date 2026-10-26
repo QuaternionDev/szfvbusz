@@ -25,6 +25,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.DirectionsBus
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -212,7 +214,8 @@ fun BoardButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
 
 /**
  * Az egy irányba induló járatok csoportjának címe, állomáson a kocsiállásaival.
- * [onClick] esetén ezzel az iránnyal felül nyitja meg a megállót.
+ * [onClick] esetén ezzel az iránnyal felül nyitja meg a megállót; [onFavorite] esetén csillag is
+ * van rajta, amellyel az irány kedvencnek jelölhető.
  */
 @Composable
 fun DirectionHeader(
@@ -220,6 +223,8 @@ fun DirectionHeader(
     platforms: List<String> = emptyList(),
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
+    isFavorite: Boolean = false,
+    onFavorite: (() -> Unit)? = null,
 ) {
     Row(
         modifier
@@ -247,6 +252,20 @@ fun DirectionHeader(
         platformText(platforms)?.let {
             Spacer(Modifier.width(8.dp))
             PlatformPill(it)
+        }
+        if (onFavorite != null) {
+            Spacer(Modifier.width(4.dp))
+            // Kisebb, mint egy IconButton, hogy a fejléc ne legyen tőle magasabb.
+            Icon(
+                if (isFavorite) Icons.Default.Star else Icons.Default.StarBorder,
+                contentDescription = if (isFavorite) "Irány eltávolítása a kedvencek közül" else "Irány hozzáadása a kedvencekhez",
+                tint = if (isFavorite) Color(0xFFFFB300) else MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .clickable(onClick = onFavorite)
+                    .padding(6.dp)
+                    .size(22.dp),
+            )
         }
     }
 }

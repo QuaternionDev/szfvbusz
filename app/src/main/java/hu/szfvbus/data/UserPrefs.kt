@@ -20,6 +20,8 @@ data class Prefs(
     val favoriteStops: Set<String> = emptySet(),
     /** A vonalak gtfsId-i. */
     val favoriteLines: Set<String> = emptySet(),
+    /** Kedvenc megállóirányok, irányonként egy peron azonosítójával (lásd [hu.szfvbus.data.model.StopGroup.sameDirection]). */
+    val favoriteDirections: Set<String> = emptySet(),
     val showIntercity: Boolean = false,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     /** Értesítések az új forgalmi változásokról. */
@@ -49,6 +51,7 @@ enum class ThemeMode(val label: String) {
 class UserPrefs(private val context: Context) {
     private val favStopsKey = stringSetPreferencesKey("favorite_stops")
     private val favLinesKey = stringSetPreferencesKey("favorite_lines")
+    private val favDirectionsKey = stringSetPreferencesKey("favorite_directions")
     private val intercityKey = booleanPreferencesKey("show_intercity")
     private val themeKey = stringPreferencesKey("theme_mode")
     private val notifyKey = booleanPreferencesKey("notify_alerts")
@@ -64,6 +67,7 @@ class UserPrefs(private val context: Context) {
         Prefs(
             favoriteStops = p[favStopsKey].orEmpty(),
             favoriteLines = p[favLinesKey].orEmpty(),
+            favoriteDirections = p[favDirectionsKey].orEmpty(),
             showIntercity = p[intercityKey] ?: false,
             themeMode = ThemeMode.entries.firstOrNull { it.name == p[themeKey] } ?: ThemeMode.SYSTEM,
             notifyAlerts = p[notifyKey] ?: true,
@@ -127,6 +131,18 @@ class UserPrefs(private val context: Context) {
     suspend fun toggleFavoriteStop(groupName: String) = toggle(favStopsKey, groupName)
 
     suspend fun toggleFavoriteLine(routeId: String) = toggle(favLinesKey, routeId)
+
+    /**
+     * Egy megállóirány, amelynek a peronjai [stopIds]: ha bármelyikük kedvenc, mind kikerül,
+     * különben az első bekerül.
+     */
+    suspend fun toggleFavoriteDirection(stopIds: List<String>) {
+        if (stopIds.isEmpty()) return
+        context.dataStore.edit { p ->
+            val current = p[favDirectionsKey].orEmpty()
+            p[favDirectionsKey] = if (stopIds.any { it in current }) current - stopIds.toSet() else current + stopIds.first()
+        }
+    }
 
     suspend fun setShowIntercity(value: Boolean) {
         context.dataStore.edit { it[intercityKey] = value }

@@ -9,6 +9,7 @@ import hu.szfvbus.data.model.PatternInfo
 import hu.szfvbus.data.model.RidePhase
 import hu.szfvbus.data.model.RouteDetails
 import hu.szfvbus.data.model.Stop
+import hu.szfvbus.data.model.StopGroup
 import hu.szfvbus.data.model.TripDetails
 import hu.szfvbus.data.model.TripStop
 import hu.szfvbus.data.model.directionGroups
@@ -133,6 +134,19 @@ class ModelsTest {
         assertEquals(listOf("2"), groups[1].platforms)
         assertEquals("12.\u00A0kocsiállás", station.getValue("v_12").platformLabel)
         assertTrue(directionGroups(listOf(departure("a_1", 100)), csapoUtca).single().platforms.isEmpty())
+    }
+
+    @Test
+    fun favoriteDirectionCoversAllItsPlatforms() {
+        val group = StopGroup(
+            "Csapó utca",
+            (csapoUtca.values + stop("a_4", "Csapó utca")).sortedBy { it.id },
+        )
+        // Az azonos irányú peronok együtt; ha csak az egyikről indul busz, a többi is hozzá tartozik.
+        assertEquals(listOf("a_1", "a_3"), group.sameDirection(setOf("a_3")))
+        assertEquals(listOf("a_2"), group.sameDirection(listOf("a_2")))
+        // Irány nélküli (végállomási) peron csak önmaga.
+        assertEquals(listOf("a_4"), group.sameDirection(listOf("a_4")))
     }
 
     @Test

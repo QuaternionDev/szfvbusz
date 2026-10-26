@@ -240,8 +240,11 @@ fun StopPanel(
     firstStopId: String?,
     departures: Load<List<Departure>>,
     isFavorite: Boolean,
+    /** A kedvenc irányok peronjai (lásd [StopGroup.sameDirection]). */
+    favoriteDirections: Set<String>,
     now: Long,
     onFavorite: () -> Unit,
+    onFavoriteDirection: (stopIds: List<String>) -> Unit,
     onTimetable: () -> Unit,
     onDepartureClick: (Departure) -> Unit,
     onBoard: (Departure) -> Unit,
@@ -276,7 +279,15 @@ fun StopPanel(
                 item { EmptyBox("A következő órákban nincs indulás erről a megállóról.") }
             } else {
                 for (direction in directionGroups(list, stops, firstStopId)) {
-                    item(key = "h-${direction.label}") { DirectionHeader(direction.label, direction.platforms) }
+                    item(key = "h-${direction.label}") {
+                        val ids = group?.sameDirection(direction.stopIds) ?: direction.stopIds.sorted()
+                        DirectionHeader(
+                            direction.label,
+                            direction.platforms,
+                            isFavorite = ids.any { it in favoriteDirections },
+                            onFavorite = { onFavoriteDirection(ids) },
+                        )
+                    }
                     if (direction.departures.isEmpty()) {
                         item(key = "e-${direction.label}") {
                             Text(
