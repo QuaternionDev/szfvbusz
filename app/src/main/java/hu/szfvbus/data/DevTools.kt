@@ -1,5 +1,6 @@
 package hu.szfvbus.data
 
+import hu.szfvbus.data.model.GeoPoint
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -17,6 +18,10 @@ data class DevState(
     val fakeDelayMin: Int = 0,
     /** Kitalált forgalmi hír ezen a vonalon. */
     val testAlertLine: String? = null,
+    /** A valódi helyett ezt használja az app; az utazásteszt a megállóba, majd a buszra teszi az utast. */
+    val fakeLocation: GeoPoint? = null,
+    /** A futó utazásteszt járata, pl. „14 → Szedreskerti lakónegyed, Autóbusz-állomás 11:13”. */
+    val rideTest: String? = null,
 ) {
     val isActive get() = this != DevState()
 }

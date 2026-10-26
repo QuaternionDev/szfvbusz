@@ -19,11 +19,14 @@ import hu.szfvbus.data.model.LaunchNotice
 import hu.szfvbus.data.model.LegMode
 import hu.szfvbus.data.model.Network
 import hu.szfvbus.data.model.noticeQueue
+import hu.szfvbus.data.model.rideStatus
+import hu.szfvbus.data.model.RidePhase
 import hu.szfvbus.data.model.RouteDetails
 import hu.szfvbus.data.model.TripDetails
 import hu.szfvbus.data.model.Vehicle
 import hu.szfvbus.ui.common.Load
 import hu.szfvbus.ui.common.userMessage
+import hu.szfvbus.util.DevClock
 import hu.szfvbus.util.TimeUtil
 import hu.szfvbus.util.platformText
 import kotlinx.coroutines.CancellationException
@@ -214,7 +217,8 @@ class MapViewModel(container: AppContainer) : ViewModel() {
         launch {
             while (true) {
                 refreshVehicles()
-                delay(VEHICLE_POLL_MS)
+                // Gyorsított fejlesztői időben sűrűbben, hogy a szimulált busz ne ugráljon megállókat.
+                delay((VEHICLE_POLL_MS / DevClock.speed).toLong().coerceAtLeast(MIN_VEHICLE_POLL_MS))
             }
         }
         launch {
@@ -267,6 +271,7 @@ class MapViewModel(container: AppContainer) : ViewModel() {
             allVehicles.value = repo.vehicles() + simulated
             _vehiclesUpdatedAt.value = TimeUtil.nowSec()
             _vehicleError.value = null
+            moveRideTestPassenger()
             // Ha az utazás a busz elindulása előtt kezdődött, a buszt felveszi, amint az megjelenik.
             val sel = _selection.value
             if (sel is Selection.Ride && !rideFollowStarted) {
@@ -472,6 +477,81 @@ class MapViewModel(container: AppContainer) : ViewModel() {
     /** Kiválasztja a leszállási megállót; újra kiválasztva visszaáll a vonal végére. */
     fun setAlightStop(stopId: String) {
         _alightStopId.value = if (_alightStopId.value == stopId) null else stopId
+    }
+
+    /**
+     * Fejlesztői utazásteszt: egy hamarosan induló járat elé teszi az órát [speed]-szeres tempóval, az utast
+     * a megállóba, szimulálja a buszt, és megnyitja a megállót, ahol a „Felszállok” gomb vár. A térképen
+     * nyitott megállóból indul, ha van, különben abból, amelyiket a legtöbb vonal érinti.
+     */
+    fun startRideTest(speed: Double, onResult: (started: Boolean, message: String) -> Unit) {
+        viewModelScope.launch {
+            val net = (_network.value as? Load.Success)?.data
+                ?: return@launch onResult(false, "A vonalak és megállók még nem töltődtek be")
+            val group = (_selection.value as? Selection.StopGroup)?.let { net.group(it.name) }
+                ?: net.groups.maxByOrNull { it.lines.size }
+                ?: return@launch onResult(false, "Nincs megálló")
+            try {
+                val candidates = repo.departures(group.ids, count = 6, rangeSec = 12 * 3600, startTime = TimeUtil.nowSec() + 60)
+                    .filter { it.isLocal }
+                    .take(RIDE_TEST_CANDIDATES)
+                // Olyan járat kell, amelyen a felszállás után még legalább néhány megálló van.
+                var picked: Pair<Departure, TripDetails>? = null
+                for (dep in candidates) {
+                    val details = repo.trip(dep.tripId, TimeUtil.serviceDateOf(dep.serviceDay)) ?: continue
+                    val board = details.indexOfStop(dep.stopId, null) ?: continue
+                    if (details.stops.lastIndex - board >= RIDE_TEST_MIN_STOPS) {
+                        picked = dep to details
+                        break
+                    }
+                }
+                val (dep, details) = picked
+                    ?: return@launch onResult(false, "${group.name}: a következő 12 órában nincs megfelelő indulás")
+                if (_selection.value is Selection.Ride) endRide()
+                DevClock.set((dep.expected - RIDE_TEST_WAIT_SEC) * 1000, speed)
+                DevTools.update {
+                    it.copy(
+                        simulateVehicles = true,
+                        fakeLocation = net.stops[dep.stopId]?.point ?: group.center,
+                        rideTest = "${dep.line} → ${dep.headsign}, ${group.name} ${TimeUtil.clock(dep.expected)}",
+                    )
+                }
+                simulator.track(details)
+                selectStopGroup(group.name, dep.stopId)
+                // Ugyanannál a megállónál a régi idő indulásai maradnának kint.
+                retrySelection()
+                onResult(true, "${group.name}, indulás ${TimeUtil.clock(dep.expected)}: ${dep.line} → ${dep.headsign}")
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                onResult(false, e.userMessage())
+            }
+        }
+    }
+
+    /** Leállítja az utazástesztet: valós idő, valódi helyzet és buszok. */
+    fun stopRideTest() {
+        endRide()
+        DevTools.update { it.copy(simulateVehicles = false, fakeLocation = null, rideTest = null) }
+        DevClock.reset()
+        retrySelection()
+    }
+
+    /** Utazásteszt közben az utas a megállóban vár, felszállás után a busszal halad, végül a leszállási megállóban marad. */
+    private fun moveRideTestPassenger() {
+        if (DevTools.current.rideTest == null) return
+        val sel = _selection.value as? Selection.Ride ?: return
+        val details = (_trip.value as? Load.Success)?.data?.takeIf { it.tripId == sel.tripId } ?: return
+        val vehicle = findVehicle(sel.tripId, sel.vehicleId) ?: return
+        val board = details.indexOfStop(sel.boardStopId, null) ?: return
+        val alight = _alightStopId.value?.let { details.indexOfStop(it, null) }
+        val status = rideStatus(details, board, alight, details.nextStopIndex(TimeUtil.nowSec(), vehicle.nextStopName))
+        val point = when (status.phase) {
+            RidePhase.WAITING -> return
+            RidePhase.RIDING, RidePhase.ALIGHT_NEXT -> GeoPoint(vehicle.lat, vehicle.lon)
+            RidePhase.ARRIVED -> details.stops[status.targetIndex].let { GeoPoint(it.lat, it.lon) }
+        }
+        DevTools.update { it.copy(fakeLocation = point) }
     }
 
     /** „Leszállok”: befejezi az utazást. */
@@ -697,11 +777,19 @@ class MapViewModel(container: AppContainer) : ViewModel() {
 
     companion object {
         const val VEHICLE_POLL_MS = 5_000L
+        const val MIN_VEHICLE_POLL_MS = 1_500L
         const val DEPARTURES_POLL_MS = 20_000L
         const val TRIP_POLL_MS = 15_000L
         const val RIDE_POLL_MS = 10_000L
         const val ALERTS_POLL_MS = 10 * 60_000L
         const val UPDATE_CHECK_INTERVAL_MS = 24 * 60 * 60_000L
+
+        /** Az utazásteszt ennyivel a busz indulása előtt kezdődik. */
+        const val RIDE_TEST_WAIT_SEC = 3 * 60
+
+        /** Legalább ennyi megálló legyen a felszállás után, hogy a leszállás előtti jelzés is kipróbálható legyen. */
+        const val RIDE_TEST_MIN_STOPS = 4
+        const val RIDE_TEST_CANDIDATES = 8
         const val WALK_COLOR = 0xFF607D8B.toInt()
         const val START_COLOR = 0xFF2E7D32.toInt()
         const val END_COLOR = 0xFFC62828.toInt()

@@ -94,6 +94,7 @@ import hu.szfvbus.ui.dev.devStatusText
 import hu.szfvbus.ui.notice.CONTACT_EMAIL
 import hu.szfvbus.ui.notice.LiveCoverageMark
 import hu.szfvbus.ui.notice.UNOFFICIAL_TITLE
+import hu.szfvbus.util.DevClock
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -127,7 +128,8 @@ fun MapScreen(
     val prefs by vm.prefs.collectAsStateWithLifecycle()
     val alightStopId by vm.alightStopId.collectAsStateWithLifecycle()
     val alerts by vm.alerts.collectAsStateWithLifecycle()
-    val now = rememberNow(5_000)
+    // Gyorsított fejlesztői időben sűrűbben, hogy az utazás egyik szakasza se maradjon ki.
+    val now = rememberNow((5_000 / DevClock.speed).toLong().coerceAtLeast(500))
     val context = LocalContext.current
 
     val rideInfo = (selection as? Selection.Ride)?.let { sel ->

@@ -10,12 +10,19 @@ import android.location.LocationManager
 import android.os.Looper
 import androidx.core.content.ContextCompat
 import hu.szfvbus.data.model.GeoPoint
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 
-/** Helymeghatározás a rendszer LocationManagerével (GPS + hálózat), így nem kell hozzá Play Services. */
+/**
+ * Helymeghatározás a rendszer LocationManagerével (GPS + hálózat), így nem kell hozzá Play Services.
+ * A fejlesztői mód hamis helyzete ([DevState.fakeLocation]) mindkét lekérdezésben felülírja a valódit.
+ */
 class LocationRepository(private val context: Context) {
     private val manager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
@@ -27,6 +34,7 @@ class LocationRepository(private val context: Context) {
 
     @SuppressLint("MissingPermission")
     fun lastKnown(): GeoPoint? {
+        DevTools.current.fakeLocation?.let { return it }
         if (!hasPermission()) return null
         return providers()
             .mapNotNull { runCatching { manager.getLastKnownLocation(it) }.getOrNull() }
@@ -35,8 +43,14 @@ class LocationRepository(private val context: Context) {
     }
 
     /** Kiadja a legjobb helyzetet, ahogy pontosodik; engedély nélkül üres. */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun updates(minTimeMs: Long = 3000): Flow<GeoPoint> =
+        DevTools.state.map { it.fakeLocation }.distinctUntilChanged().flatMapLatest { fake ->
+            if (fake != null) flowOf(fake) else systemUpdates(minTimeMs)
+        }
+
     @SuppressLint("MissingPermission")
-    fun updates(minTimeMs: Long = 3000): Flow<GeoPoint> = callbackFlow {
+    private fun systemUpdates(minTimeMs: Long): Flow<GeoPoint> = callbackFlow {
         if (!hasPermission()) {
             close()
             return@callbackFlow

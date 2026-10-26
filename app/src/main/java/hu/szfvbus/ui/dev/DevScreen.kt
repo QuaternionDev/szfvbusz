@@ -39,7 +39,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -82,6 +85,7 @@ fun devStatusText(): String? {
         if (dev.fakeDelayMin != 0) add("késés ${"%+d".format(dev.fakeDelayMin)} perc")
         if (dev.boardAnyDeparture) add("felszállás bármikor")
         if (dev.testAlertLine != null) add("teszt hír: ${dev.testAlertLine}")
+        if (dev.rideTest != null) add("utazásteszt") else if (dev.fakeLocation != null) add("hamis helyzet")
     }
     return parts.takeIf { it.isNotEmpty() }?.joinToString(" · ")
 }
@@ -104,6 +108,7 @@ fun DevScreen(vm: MapViewModel, onBack: () -> Unit, onOpenAlerts: () -> Unit) {
     val launchNotices by vm.launchNotices.collectAsStateWithLifecycle()
     val now = rememberNow(1_000)
     val net = (network as? Load.Success)?.data
+    var rideTestSpeed by remember { mutableDoubleStateOf(10.0) }
 
     fun toast(text: String) = Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
     // Az oldal másodpercenként frissül, így az óra változása is látszik.
@@ -182,6 +187,39 @@ fun DevScreen(vm: MapViewModel, onBack: () -> Unit, onOpenAlerts: () -> Unit) {
                             "Az élő követés, az ÉLŐ jelvény és a felszállás így éjjel is kipróbálható.",
                         dev.simulateVehicles,
                     ) { on -> DevTools.update { it.copy(simulateVehicles = on) } }
+                }
+            }
+
+            item {
+                Section(
+                    "Utazásteszt",
+                    "Mintha a megállóban várnál: az óra 3 perccel egy induló busz elé ugrik, a helyzeted a " +
+                        "megállóba kerül, a busz szimulálva érkezik. A „Felszállok” gombot te nyomod meg, utazás " +
+                        "közben a helyzeted a busszal halad, a leszállás előtt rezeg, a végén „Leszállok”. A térképen " +
+                        "nyitott megállóból indul, különben a legforgalmasabból.",
+                ) {
+                    Text("Az idő sebessége", style = MaterialTheme.typography.labelLarge)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf(1.0, 5.0, 10.0).forEach { speed ->
+                            FilterChip(
+                                selected = rideTestSpeed == speed,
+                                onClick = { rideTestSpeed = speed },
+                                label = { Text("${speed.toInt()}×") },
+                            )
+                        }
+                    }
+                    dev.rideTest?.let { Info("Fut", it) }
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Button(onClick = {
+                            vm.startRideTest(rideTestSpeed) { started, message ->
+                                toast(message)
+                                if (started) onBack()
+                            }
+                        }) { Text(if (dev.rideTest == null) "Utazásteszt indítása" else "Újraindítás") }
+                        if (dev.rideTest != null) {
+                            OutlinedButton(onClick = { vm.stopRideTest() }) { Text("Leállítás") }
+                        }
+                    }
                 }
             }
 
