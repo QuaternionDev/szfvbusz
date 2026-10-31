@@ -20,6 +20,15 @@ class UtilTest {
     }
 
     @Test
+    fun bearingPointsTheWayOfTravel() {
+        val center = GeoPoint(47.19, 18.41)
+        assertEquals(0f, bearingDeg(center, GeoPoint(47.20, 18.41)), 0.5f)
+        assertEquals(90f, bearingDeg(center, GeoPoint(47.19, 18.42)), 0.5f)
+        assertEquals(180f, bearingDeg(center, GeoPoint(47.18, 18.41)), 0.5f)
+        assertEquals(270f, bearingDeg(center, GeoPoint(47.19, 18.40)), 0.5f)
+    }
+
+    @Test
     fun decodesEmptyPolyline() {
         assertTrue(Polyline.decode(null).isEmpty())
         assertTrue(Polyline.decode("").isEmpty())

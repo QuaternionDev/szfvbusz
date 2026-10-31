@@ -50,6 +50,35 @@ class MapIcons(context: Context) {
         return bmp
     }
 
+    /** Felfelé mutató navigációs nyíl halvány udvarral az utas helyzetéhez; a térkép a haladási irányával forgatja. */
+    fun navigationArrow(): Bitmap {
+        val size = (48 * density).toInt()
+        val bmp = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+        val c = Canvas(bmp)
+        val cx = size / 2f
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+        paint.color = Color.argb(48, 0x1E, 0x88, 0xE5)
+        c.drawCircle(cx, cx, cx, paint)
+        val h = 14f * density
+        val w = 11f * density
+        val path = Path().apply {
+            moveTo(cx, cx - h)
+            lineTo(cx + w, cx + h)
+            lineTo(cx, cx + h * 0.45f)
+            lineTo(cx - w, cx + h)
+            close()
+        }
+        paint.color = Color.WHITE
+        paint.style = Paint.Style.STROKE
+        paint.strokeWidth = 3f * density
+        paint.strokeJoin = Paint.Join.ROUND
+        c.drawPath(path, paint)
+        paint.style = Paint.Style.FILL
+        paint.color = Color.rgb(0x1E, 0x88, 0xE5)
+        c.drawPath(path, paint)
+        return bmp
+    }
+
     /** Felfelé (északra) mutató csepp; a térkép a jármű haladási irányával forgatja. */
     fun pointer(color: Int): Bitmap {
         val size = (canvasDp * density).toInt()

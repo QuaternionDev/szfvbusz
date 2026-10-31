@@ -28,6 +28,8 @@ import hu.szfvbus.ui.common.Load
 import hu.szfvbus.ui.common.userMessage
 import hu.szfvbus.util.DevClock
 import hu.szfvbus.util.TimeUtil
+import hu.szfvbus.util.bearingDeg
+import hu.szfvbus.util.distanceM
 import hu.szfvbus.util.platformText
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.coroutineScope
@@ -72,6 +74,8 @@ sealed interface CameraCommand {
     data class Fit(val points: List<GeoPoint>) : CameraCommand
     /** A [navigation] megdönti a térképet és ráközelít, mint egy navigációs alkalmazás. */
     data class Follow(val vehicleId: String?, val navigation: Boolean = false) : CameraCommand
+    /** Navigációs nézet az utas saját helyzetén: a haladási irány felfelé, az utas a képernyő alsó részén. */
+    data object FollowLocation : CameraCommand
     data object ResetTilt : CameraCommand
 }
 
@@ -128,6 +132,9 @@ class MapViewModel(container: AppContainer) : ViewModel() {
     /** Hogy az utazás követi-e már a buszát, így a térképet elhúzó felhasználót nem rántja vissza. */
     private var rideFollowStarted = false
 
+    /** Felszállt-e már az utas: addig a buszt követi a kamera, utána az utas saját helyzetét. */
+    private var rideBoarded = false
+
     /** A városi vonalak forgalmi változásai, sávként az érintett vonalaknál. */
     private val _alerts = MutableStateFlow<List<Alert>>(emptyList())
     val alerts = _alerts.asStateFlow()
@@ -156,6 +163,13 @@ class MapViewModel(container: AppContainer) : ViewModel() {
 
     private val _myLocation = MutableStateFlow<GeoPoint?>(null)
     val myLocation = _myLocation.asStateFlow()
+
+    /** Az utas haladási iránya fokban, két elég távoli helyzetéből számolva. */
+    private val _myHeading = MutableStateFlow<Float?>(null)
+    val myHeading = _myHeading.asStateFlow()
+
+    /** A helyzet, amelyhez képest a következő irány számolódik. */
+    private var headingAnchor: GeoPoint? = null
 
     private val retryCounter = MutableStateFlow(0)
     private var handledRetry = 0
@@ -230,9 +244,22 @@ class MapViewModel(container: AppContainer) : ViewModel() {
         }
         launch {
             locationPermissionVersion.collectLatest {
-                locationRepo.updates().collect { _myLocation.value = it }
+                locationRepo.updates().collect(::onLocation)
             }
         }
+    }
+
+    private fun onLocation(point: GeoPoint) {
+        // Álló helyzetben a GPS ingadozása ne forgassa a nyilat.
+        val anchor = headingAnchor
+        if (anchor == null || distanceM(anchor, point) >= HEADING_MIN_MOVE_M) {
+            if (anchor != null) _myHeading.value = bearingDeg(anchor, point)
+            headingAnchor = point
+        }
+        val first = _myLocation.value == null
+        _myLocation.value = point
+        // Ha a felszálláskor még nem volt helyzet, az elsővel indul a navigációs nézet.
+        if (first && rideBoarded && _follow.value) _camera.tryEmit(CameraCommand.FollowLocation)
     }
 
     /** Az engedély megadása után újraindítja a helyzetfrissítéseket. */
@@ -274,7 +301,7 @@ class MapViewModel(container: AppContainer) : ViewModel() {
             moveRideTestPassenger()
             // Ha az utazás a busz elindulása előtt kezdődött, a buszt felveszi, amint az megjelenik.
             val sel = _selection.value
-            if (sel is Selection.Ride && !rideFollowStarted) {
+            if (sel is Selection.Ride && !rideFollowStarted && !rideBoarded) {
                 findVehicle(sel.tripId, sel.vehicleId)?.let { followRide(it.id) }
             }
         } catch (e: CancellationException) {
@@ -459,6 +486,7 @@ class MapViewModel(container: AppContainer) : ViewModel() {
         if (current?.tripId != departure.tripId) _trip.value = Load.Loading
         _alightStopId.value = null
         rideFollowStarted = false
+        rideBoarded = false
         _selection.value = Selection.Ride(
             tripId = departure.tripId,
             vehicleId = vehicle?.id,
@@ -472,6 +500,26 @@ class MapViewModel(container: AppContainer) : ViewModel() {
         rideFollowStarted = true
         _follow.value = true
         _camera.tryEmit(CameraCommand.Follow(vehicleId, navigation = true))
+    }
+
+    /**
+     * A felszállás pillanata: innen a kamera a busz helyett az utas saját helyzetét követi navigációs nézetben,
+     * akkor is, ha a felhasználó közben elhúzta a térképet. Helyzet nélkül marad a busz.
+     */
+    fun setRideBoarded(boarded: Boolean) {
+        if (_selection.value !is Selection.Ride || boarded == rideBoarded) return
+        rideBoarded = boarded
+        rideFollowTarget()?.let {
+            _follow.value = true
+            _camera.tryEmit(it)
+        }
+    }
+
+    /** Amit utazás közben a követés mutat: felszállás előtt a buszt, utána az utast. */
+    private fun rideFollowTarget(): CameraCommand? {
+        val sel = _selection.value as? Selection.Ride ?: return null
+        if (rideBoarded && _myLocation.value != null) return CameraCommand.FollowLocation
+        return findVehicle(sel.tripId, sel.vehicleId)?.let { CameraCommand.Follow(it.id, navigation = true) }
     }
 
     /** Kiválasztja a leszállási megállót; újra kiválasztva visszaáll a vonal végére. */
@@ -558,6 +606,7 @@ class MapViewModel(container: AppContainer) : ViewModel() {
     fun endRide() {
         if (_selection.value !is Selection.Ride) return
         _alightStopId.value = null
+        rideBoarded = false
         clearSelection()
         _camera.tryEmit(CameraCommand.ResetTilt)
     }
@@ -573,14 +622,16 @@ class MapViewModel(container: AppContainer) : ViewModel() {
 
     fun toggleFollow() {
         val sel = _selection.value
-        val vehicle = when (sel) {
-            is Selection.Trip -> findVehicle(sel)
-            is Selection.Ride -> findVehicle(sel.tripId, sel.vehicleId)
-            else -> null
-        } ?: return
         val on = !_follow.value
+        if (sel is Selection.Ride) {
+            val target = rideFollowTarget() ?: return
+            _follow.value = on
+            _camera.tryEmit(if (on) target else CameraCommand.Follow(null))
+            return
+        }
+        val vehicle = (sel as? Selection.Trip)?.let(::findVehicle) ?: return
         _follow.value = on
-        _camera.tryEmit(CameraCommand.Follow(if (on) vehicle.id else null, navigation = sel is Selection.Ride))
+        _camera.tryEmit(CameraCommand.Follow(if (on) vehicle.id else null))
     }
 
     fun stopFollowing() {
@@ -781,6 +832,9 @@ class MapViewModel(container: AppContainer) : ViewModel() {
         const val DEPARTURES_POLL_MS = 20_000L
         const val TRIP_POLL_MS = 15_000L
         const val RIDE_POLL_MS = 10_000L
+
+        /** Ennyi elmozdulás után számol új haladási irányt. */
+        const val HEADING_MIN_MOVE_M = 8.0
         const val ALERTS_POLL_MS = 10 * 60_000L
         const val UPDATE_CHECK_INTERVAL_MS = 24 * 60 * 60_000L
 

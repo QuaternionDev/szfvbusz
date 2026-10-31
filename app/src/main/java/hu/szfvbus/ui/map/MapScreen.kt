@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -38,6 +39,7 @@ import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.TripOrigin
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
@@ -63,6 +65,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -95,6 +98,7 @@ import hu.szfvbus.ui.notice.CONTACT_EMAIL
 import hu.szfvbus.ui.notice.LiveCoverageMark
 import hu.szfvbus.ui.notice.UNOFFICIAL_TITLE
 import hu.szfvbus.util.DevClock
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -124,6 +128,7 @@ fun MapScreen(
     val direction by vm.direction.collectAsStateWithLifecycle()
     val follow by vm.follow.collectAsStateWithLifecycle()
     val myLocation by vm.myLocation.collectAsStateWithLifecycle()
+    val myHeading by vm.myHeading.collectAsStateWithLifecycle()
     val overlay by vm.overlay.collectAsStateWithLifecycle()
     val prefs by vm.prefs.collectAsStateWithLifecycle()
     val alightStopId by vm.alightStopId.collectAsStateWithLifecycle()
@@ -146,6 +151,9 @@ fun MapScreen(
     LaunchedEffect(ridePhase) {
         if (ridePhase == RidePhase.ALIGHT_NEXT) vibrateAlightAlert(context)
     }
+    // Felszállás után a kamera a busz helyett az utast követi, navigációs nézetben.
+    val boarded = ridePhase != null && ridePhase != RidePhase.WAITING
+    LaunchedEffect(boarded) { vm.setRideBoarded(boarded) }
     // Utazás közben a kijelző ébren marad, mint egy navigációs alkalmazásban.
     val view = LocalView.current
     val riding = selection is Selection.Ride
@@ -172,21 +180,42 @@ fun MapScreen(
     var showAbout by remember { mutableStateOf(false) }
     var showTheme by remember { mutableStateOf(false) }
 
+    val scope = rememberCoroutineScope()
+    val toggleSheet: () -> Unit = {
+        scope.launch {
+            if (sheetState.currentValue == SheetValue.Expanded) sheetState.partialExpand() else sheetState.expand()
+        }
+    }
+
     // Új kijelölésnél a panel a kezdő magasságán nyílik.
     LaunchedEffect(selection) {
         if (sheetState.currentValue == SheetValue.Expanded) sheetState.partialExpand()
+    }
+    // Utazás közben a vissza gomb csak a felhúzott panelt engedi le.
+    BackHandler(enabled = active && riding && sheetState.currentValue == SheetValue.Expanded) {
+        scope.launch { sheetState.partialExpand() }
     }
 
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val density = LocalDensity.current
         val screenHeight = maxHeight
         val screenHeightPx = constraints.maxHeight
-        val peekHeight = if (selection == Selection.None) 200.dp else screenHeight * 0.42f
+        // Utazás közben nincs alsó navigációs sáv, ezért a panel a rendszer sávja fölött áll meg.
+        val peekHeight = when {
+            riding -> RideSheetPeek + with(density) { WindowInsets.navigationBars.getBottom(density).toDp() }
+            selection == Selection.None -> 200.dp
+            else -> screenHeight * 0.42f
+        }
         val peekPx = with(density) { peekHeight.roundToPx() }
         val statusBarTop = WindowInsets.statusBars.getTop(density)
         val topBarPx = statusBarTop + with(density) { 72.dp.roundToPx() }
-        // A kamera azért mozdul, mert valamit kijelöltek, ezért helyet hagy a kijelölt állapot paneljének.
-        val cameraPaddingPx by rememberUpdatedState(with(density) { (screenHeight * 0.42f).roundToPx() })
+        // A kamera azért mozdul, mert valamit kijelöltek, ezért helyet hagy a kijelölt állapot paneljének;
+        // utazás közben csak az alacsony sávnak.
+        val cameraPaddingPx by rememberUpdatedState(
+            if (riding) peekPx + with(density) { 24.dp.roundToPx() } else with(density) { (screenHeight * 0.42f).roundToPx() },
+        )
+        // A navigációs nézetben az utas a képernyő alsó részén van, előtte látszik az út.
+        val navigationTopPx by rememberUpdatedState((screenHeightPx * 0.6f).roundToInt())
         // Az utazási kártya magasabb a keresősávnál.
         val fitTopPx by rememberUpdatedState(if (riding) statusBarTop + with(density) { 190.dp.roundToPx() } else topBarPx)
 
@@ -218,7 +247,7 @@ fun MapScreen(
             controller?.setVehicles(shownVehicles, vehicleColors(shownVehicles), selectedVehicleId)
         }
         LaunchedEffect(controller, overlay) { controller?.setOverlay(overlay) }
-        LaunchedEffect(controller, myLocation) { controller?.setMyLocation(myLocation) }
+        LaunchedEffect(controller, myLocation, myHeading, boarded) { controller?.setMyLocation(myLocation, myHeading, arrow = boarded) }
         LaunchedEffect(controller) {
             val c = controller ?: return@LaunchedEffect
             vm.camera.collect { cmd ->
@@ -226,6 +255,7 @@ fun MapScreen(
                     is CameraCommand.Center -> c.moveTo(cmd.point, cmd.zoom, cameraPaddingPx)
                     is CameraCommand.Fit -> c.fit(cmd.points, cameraPaddingPx, fitTopPx)
                     is CameraCommand.Follow -> c.follow(cmd.vehicleId, cameraPaddingPx, cmd.navigation)
+                    CameraCommand.FollowLocation -> c.followLocation(cameraPaddingPx, navigationTopPx)
                     CameraCommand.ResetTilt -> c.resetTilt()
                 }
             }
@@ -235,6 +265,7 @@ fun MapScreen(
             scaffoldState = scaffoldState,
             sheetPeekHeight = peekHeight,
             sheetShadowElevation = 8.dp,
+            sheetDragHandle = if (riding) { { RideDragHandle() } } else { { BottomSheetDefaults.DragHandle() } },
             sheetContent = {
                 Box(Modifier.fillMaxWidth().height(screenHeight * 0.88f)) {
                     SheetContent(
@@ -253,9 +284,12 @@ fun MapScreen(
                         favoriteDirections = prefs.favoriteDirections,
                         favoriteLines = prefs.favoriteLines,
                         rideInfo = rideInfo,
+                        // Felszállás előtt a buszt, utána az utas helyzetét lehet követni.
+                        canFollowRide = rideInfo?.vehicle != null || (boarded && myLocation != null),
                         alerts = alerts,
                         now = now,
                         onOpenTimetable = onOpenTimetable,
+                        onToggleSheet = toggleSheet,
                     )
                 }
             },
@@ -652,9 +686,11 @@ private fun SheetContent(
     favoriteDirections: Set<String>,
     favoriteLines: Set<String>,
     rideInfo: RideInfo?,
+    canFollowRide: Boolean,
     alerts: List<hu.szfvbus.data.model.Alert>,
     now: Long,
     onOpenTimetable: (groupName: String, routeId: String?) -> Unit,
+    onToggleSheet: () -> Unit,
 ) {
     val net = (network as? Load.Success)?.data
     when (selection) {
@@ -718,10 +754,13 @@ private fun SheetContent(
             info = rideInfo,
             alerts = alerts,
             follow = follow,
+            canFollow = canFollowRide,
+            now = now,
             onFollow = vm::toggleFollow,
             onAlightStop = vm::setAlightStop,
             onEnd = vm::endRide,
             onRetry = vm::retrySelection,
+            onToggleSheet = onToggleSheet,
         )
     }
 }

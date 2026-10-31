@@ -4,6 +4,7 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.RectF
 import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.LinearInterpolator
 import hu.szfvbus.data.LineColors
 import hu.szfvbus.data.model.GeoPoint
 import hu.szfvbus.data.model.Stop
@@ -123,6 +124,25 @@ class MapController(
     private var pendingFollowNavigation: Boolean? = null
     private var animator: ValueAnimator? = null
 
+    /** Utazás közben, felszállás után a kamera az utas helyzetét követi navigációs nézetben. */
+    private var followUser = false
+    /** Navigációs követés, amelyet még az első helyzet előtt kértek. */
+    private var pendingUserFollow = false
+    private var followPaddingTop = 0.0
+    private var locationFrame: Frame? = null
+    private var locationArrow = false
+    private var locationAnimator: ValueAnimator? = null
+
+    private val followCallback = object : MapLibreMap.CancelableCallback {
+        override fun onCancel() {
+            followAnimating = false
+        }
+
+        override fun onFinish() {
+            followAnimating = false
+        }
+    }
+
     private val clickListener = MapLibreMap.OnMapClickListener { latLng -> handleClick(latLng) }
     private val longClickListener = MapLibreMap.OnMapLongClickListener { latLng ->
         onLongClick?.invoke(GeoPoint(latLng.latitude, latLng.longitude))
@@ -133,6 +153,7 @@ class MapController(
     }
 
     init {
+        style.addImage(IMAGE_NAV_ARROW, icons.navigationArrow())
         addSourcesAndLayers()
         map.addOnMapClickListener(clickListener)
         map.addOnMapLongClickListener(longClickListener)
@@ -252,7 +273,7 @@ class MapController(
                 circleRadius(22f),
                 circleColor("#1E88E5"),
                 circleOpacity(0.18f),
-            ),
+            ).withFilter(Expression.not(toBool(get("arrow")))),
         )
         style.addLayer(
             CircleLayer(LAYER_LOCATION, SRC_LOCATION).withProperties(
@@ -260,7 +281,7 @@ class MapController(
                 circleColor("#1E88E5"),
                 circleStrokeColor("#FFFFFF"),
                 circleStrokeWidth(3f),
-            ),
+            ).withFilter(Expression.not(toBool(get("arrow")))),
         )
         style.addLayer(
             SymbolLayer(LAYER_VEHICLE_POINTERS, SRC_VEHICLES).withProperties(
@@ -282,6 +303,17 @@ class MapController(
                 iconSize(switchCase(toBool(get("sel")), literal(1.25f), literal(1f))),
                 symbolZOrder(Property.SYMBOL_Z_ORDER_SOURCE),
             ),
+        )
+        // Utazás közben az utas nyila a buszok fölött van, hiszen éppen az egyiken ül.
+        style.addLayer(
+            SymbolLayer(LAYER_LOCATION_ARROW, SRC_LOCATION).withProperties(
+                iconImage(IMAGE_NAV_ARROW),
+                iconRotate(toNumber(get("heading"))),
+                iconRotationAlignment(Property.ICON_ROTATION_ALIGNMENT_MAP),
+                iconPitchAlignment(Property.ICON_PITCH_ALIGNMENT_VIEWPORT),
+                iconAllowOverlap(true),
+                iconIgnorePlacement(true),
+            ).withFilter(toBool(get("arrow"))),
         )
     }
 
@@ -358,11 +390,109 @@ class MapController(
         )
     }
 
-    fun setMyLocation(point: GeoPoint?) {
+    /**
+     * Az utas helyzete: kék pont, utazás közben ([arrow]) a haladási irányba ([heading]) forgatott nyíl.
+     * A kis elmozdulásokat simán csúsztatja, és navigációs követésnél a kamerát is viszi.
+     */
+    fun setMyLocation(point: GeoPoint?, heading: Float?, arrow: Boolean) {
+        locationArrow = arrow
+        locationAnimator?.cancel()
+        val start = locationFrame
+        val target = point?.let { Frame(it.lat, it.lon, heading ?: start?.heading) }
+        if (start == null || target == null || isFar(start, target)) {
+            renderLocation(target)
+            return
+        }
+        locationAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = ANIMATION_MS
+            interpolator = LinearInterpolator()
+            addUpdateListener {
+                val t = it.animatedValue as Float
+                renderLocation(
+                    Frame(
+                        lat = start.lat + (target.lat - start.lat) * t,
+                        lon = start.lon + (target.lon - start.lon) * t,
+                        heading = lerpAngle(start.heading, target.heading, t),
+                    ),
+                )
+            }
+            start()
+        }
+    }
+
+    private fun renderLocation(frame: Frame?) {
+        locationFrame = frame
         locationSource.setGeoJson(
             FeatureCollection.fromFeatures(
-                listOfNotNull(point?.let { Feature.fromGeometry(Point.fromLngLat(it.lon, it.lat)) }),
+                listOfNotNull(
+                    frame?.let { f ->
+                        Feature.fromGeometry(Point.fromLngLat(f.lon, f.lat)).apply {
+                            addBooleanProperty("arrow", locationArrow)
+                            addNumberProperty("heading", f.heading ?: 0f)
+                        }
+                    },
+                ),
             ),
+        )
+        if (!followUser || frame == null) return
+        if (pendingUserFollow) {
+            pendingUserFollow = false
+            animateToUser(frame)
+            return
+        }
+        if (followAnimating) return
+        map.moveCamera(
+            CameraUpdateFactory.newCameraPosition(
+                CameraPosition.Builder(map.cameraPosition)
+                    .target(LatLng(frame.lat, frame.lon))
+                    .bearing(frame.heading?.toDouble() ?: map.cameraPosition.bearing)
+                    .padding(0.0, followPaddingTop, 0.0, followPaddingBottom)
+                    .build(),
+            ),
+        )
+    }
+
+    private fun isFar(a: Frame, b: Frame) = abs(a.lat - b.lat) > 0.02 || abs(a.lon - b.lon) > 0.03
+
+    /** Szögek közti átmenet a rövidebb úton, hogy 350° és 10° között ne forduljon körbe. */
+    private fun lerpAngle(a: Float?, b: Float?, t: Float): Float? {
+        if (a == null || b == null) return b ?: a
+        val diff = ((b - a + 540f) % 360f) - 180f
+        return (a + diff * t + 360f) % 360f
+    }
+
+    /**
+     * Navigációs nézet az utas helyzetén: közel, megdöntve, a haladási iránnyal felfelé. A [topPaddingPx]
+     * lejjebb tolja az utast, hogy előre többet lásson, mint egy autós navigációban.
+     */
+    fun followLocation(bottomPaddingPx: Int, topPaddingPx: Int) {
+        followVehicleId = null
+        pendingFollowNavigation = null
+        followUser = true
+        followPaddingBottom = bottomPaddingPx.toDouble()
+        followPaddingTop = topPaddingPx.toDouble()
+        val frame = locationFrame
+        if (frame == null) {
+            pendingUserFollow = true
+            return
+        }
+        animateToUser(frame)
+    }
+
+    private fun animateToUser(frame: Frame) {
+        followAnimating = true
+        map.animateCamera(
+            CameraUpdateFactory.newCameraPosition(
+                CameraPosition.Builder()
+                    .target(LatLng(frame.lat, frame.lon))
+                    .zoom(USER_NAVIGATION_ZOOM)
+                    .tilt(NAVIGATION_TILT)
+                    .bearing(frame.heading?.toDouble() ?: map.cameraPosition.bearing)
+                    .padding(0.0, followPaddingTop, 0.0, followPaddingBottom)
+                    .build(),
+            ),
+            800,
+            followCallback,
         )
     }
 
@@ -408,7 +538,7 @@ class MapController(
         val ordered = vehicles.sortedBy { it.id == selectedVehicleId }
         for (v in ordered) {
             val s = starts[v.id] ?: Frame(v.lat, v.lon, v.heading)
-            val far = abs(s.lat - v.lat) > 0.02 || abs(s.lon - v.lon) > 0.03
+            val far = isFar(s, Frame(v.lat, v.lon, null))
             val k = if (far) 1.0 else t.toDouble()
             val frame = Frame(
                 lat = s.lat + (v.lat - s.lat) * k,
@@ -451,6 +581,8 @@ class MapController(
      * [navigation] módban a térkép megdől és ráközelít, mint egy navigációs alkalmazásban.
      */
     fun follow(vehicleId: String?, bottomPaddingPx: Int, navigation: Boolean = false) {
+        followUser = false
+        pendingUserFollow = false
         followVehicleId = vehicleId
         followPaddingBottom = bottomPaddingPx.toDouble()
         val frame = vehicleId?.let { displayed[it] }
@@ -467,15 +599,7 @@ class MapController(
                     .build(),
             ),
             600,
-            object : MapLibreMap.CancelableCallback {
-                override fun onCancel() {
-                    followAnimating = false
-                }
-
-                override fun onFinish() {
-                    followAnimating = false
-                }
-            },
+            followCallback,
         )
     }
 
@@ -524,6 +648,8 @@ class MapController(
     fun dispose() {
         animator?.cancel()
         animator = null
+        locationAnimator?.cancel()
+        locationAnimator = null
         map.removeOnMapClickListener(clickListener)
         map.removeOnMapLongClickListener(longClickListener)
         map.removeOnCameraMoveStartedListener(moveStartedListener)
@@ -558,6 +684,9 @@ class MapController(
         private const val LAYER_SELECTED_STOP_LABELS = "szfv-selected-stop-labels"
         private const val NAVIGATION_ZOOM = 16.3
         private const val NAVIGATION_TILT = 50.0
+        private const val USER_NAVIGATION_ZOOM = 17.0
+        private const val IMAGE_NAV_ARROW = "szfv-nav-arrow"
+        private const val LAYER_LOCATION_ARROW = "szfv-location-arrow"
         private const val LAYER_ENDPOINTS = "szfv-endpoints"
         private const val LAYER_LOCATION_HALO = "szfv-location-halo"
         private const val LAYER_LOCATION = "szfv-location"

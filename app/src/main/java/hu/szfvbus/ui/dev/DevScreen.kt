@@ -194,8 +194,9 @@ fun DevScreen(vm: MapViewModel, onBack: () -> Unit, onOpenAlerts: () -> Unit) {
                 Section(
                     "Utazásteszt",
                     "Mintha a megállóban várnál: az óra 3 perccel egy induló busz elé ugrik, a helyzeted a " +
-                        "megállóba kerül, a busz szimulálva érkezik. A „Felszállok” gombot te nyomod meg, utazás " +
-                        "közben a helyzeted a busszal halad, a leszállás előtt rezeg, a végén „Leszállok”. A térképen " +
+                        "megállóba kerül, a busz szimulálva érkezik. A „Felszállok” gombot te nyomod meg; amíg a busz " +
+                        "oda nem ér, a térkép azt követi. Felszállás után a helyzeted a busszal halad, és a térkép " +
+                        "navigációs nézetben téged követ. A leszállás előtt rezeg, a végén „Leszállok”. A térképen " +
                         "nyitott megállóból indul, különben a legforgalmasabból.",
                 ) {
                     Text("Az idő sebessége", style = MaterialTheme.typography.labelLarge)

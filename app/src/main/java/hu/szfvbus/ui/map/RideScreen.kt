@@ -6,18 +6,25 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
@@ -27,11 +34,8 @@ import androidx.compose.material.icons.filled.GpsFixed
 import androidx.compose.material.icons.filled.GpsNotFixed
 import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.NotificationsActive
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -40,6 +44,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -187,17 +192,43 @@ fun RideBanner(info: RideInfo, now: Long, modifier: Modifier = Modifier) {
     }
 }
 
-/** Az alsó panel utazás közben: az előttünk lévő megállók, a leszállás helye és a „Leszállok” gomb. */
+/** Az utazási panel behúzott sávjának magassága, a fogantyúval együtt; a navigációs sáv még hozzájön. */
+val RideSheetPeek get() = RIDE_HANDLE_HEIGHT + RIDE_BAR_HEIGHT
+
+private val RIDE_HANDLE_HEIGHT = 20.dp
+private val RIDE_BAR_HEIGHT = 84.dp
+private val RIDE_BUTTON_SLOT = 76.dp
+
+/** Kisebb fogantyú az utazási panelhez, hogy a behúzott sáv alacsony maradjon. */
+@Composable
+fun RideDragHandle() {
+    Box(Modifier.fillMaxWidth().height(RIDE_HANDLE_HEIGHT), contentAlignment = Alignment.Center) {
+        Box(
+            Modifier
+                .size(width = 32.dp, height = 4.dp)
+                .clip(RoundedCornerShape(50))
+                .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)),
+        )
+    }
+}
+
+/**
+ * Az alsó panel utazás közben. Behúzva csak a navigációs sáv látszik: középen az érkezés a célhoz,
+ * balra a busz követése, jobbra a „Leszállok”. Felhúzva alatta a járat adatai és az előttünk lévő megállók.
+ */
 @Composable
 fun RidePanel(
     trip: Load<TripDetails>,
     info: RideInfo?,
     alerts: List<Alert>,
     follow: Boolean,
+    canFollow: Boolean,
+    now: Long,
     onFollow: () -> Unit,
     onAlightStop: (stopId: String) -> Unit,
     onEnd: () -> Unit,
     onRetry: () -> Unit,
+    onToggleSheet: () -> Unit,
 ) {
     val listState = rememberLazyListState()
     val nextIndex = info?.status?.nextIndex
@@ -207,96 +238,169 @@ fun RidePanel(
             listState.animateScrollToItem((nextIndex - info.boardIndex - 1).coerceAtLeast(0))
         }
     }
-    PanelLayout(
-        state = listState,
-        header = {
-            val details = info?.trip ?: (trip as? Load.Success)?.data
-            val vehicle = info?.vehicle
-            PanelHeader(
-                title = details?.headsign?.let { "→ $it" } ?: "Utazás",
-                subtitle = buildList {
-                    if (vehicle != null && vehicle.label.isNotEmpty()) add(vehicle.label)
-                    val delay = details?.currentDelay(TimeUtil.nowSec())
-                    if (delay != null) add(TimeUtil.delayText(delay)) else if (details != null) add("menetrend szerint")
-                    val kmh = vehicle?.speedMps?.let { (it * 3.6).roundToInt() }
-                    if (kmh != null && kmh > 0) add("$kmh km/h")
-                }.joinToString(" · ").ifEmpty { null },
-                leading = details?.let { { LineBadge(it.line, lineColorOf(it.line, it.isLocal)) } },
-                actions = {
-                    if (vehicle != null) {
-                        IconButton(onClick = onFollow) {
-                            Icon(
-                                if (follow) Icons.Default.GpsFixed else Icons.Default.GpsNotFixed,
-                                contentDescription = if (follow) "Követés kikapcsolása" else "Busz követése",
-                                tint = if (follow) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+    Column(Modifier.fillMaxSize()) {
+        RideBar(info, now, follow, canFollow, onFollow = onFollow, onEnd = onEnd, onToggle = onToggleSheet)
+        HorizontalDivider()
+        Box(Modifier.weight(1f)) {
+            PanelLayout(
+                state = listState,
+                header = {
+                    val details = info?.trip ?: (trip as? Load.Success)?.data
+                    val vehicle = info?.vehicle
+                    PanelHeader(
+                        title = details?.headsign?.let { "→ $it" } ?: "Utazás",
+                        subtitle = buildList {
+                            if (vehicle != null && vehicle.label.isNotEmpty()) add(vehicle.label)
+                            val delay = details?.currentDelay(now)
+                            if (delay != null) add(TimeUtil.delayText(delay)) else if (details != null) add("menetrend szerint")
+                            val kmh = vehicle?.speedMps?.let { (it * 3.6).roundToInt() }
+                            if (kmh != null && kmh > 0) add("$kmh km/h")
+                        }.joinToString(" · ").ifEmpty { null },
+                        leading = details?.let { { LineBadge(it.line, lineColorOf(it.line, it.isLocal)) } },
+                        modifier = Modifier.padding(top = 12.dp),
+                    )
+                    Text(
+                        if (info?.alightIndex == null) {
+                            "Koppints arra a megállóra, ahol leszállsz: szólunk, mielőtt odaérsz."
+                        } else {
+                            "A kijelölt megállóra újra koppintva visszaállíthatod a végállomásra."
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
+                    )
+                    AlertBanner(
+                        alerts.forLine(details?.takeIf { it.isLocal }?.line),
+                        Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
+                    )
+                    HorizontalDivider()
+                },
+            ) {
+                when {
+                    trip is Load.Error -> item { ErrorBox(trip.message, onRetry) }
+                    info == null -> item { LoadingBox() }
+                    else -> {
+                        val d = info.trip
+                        val color = lineColorOf(d.line, d.isLocal)
+                        val next = info.status.nextIndex
+                        val stops = d.stops.drop(info.boardIndex)
+                        itemsIndexed(stops, key = { i, s -> "${i + info.boardIndex}-${s.stopId}" }) { i, stop ->
+                            val index = i + info.boardIndex
+                            val last = index == d.stops.lastIndex
+                            TimelineRow(
+                                name = stop.name,
+                                detail = stop.platformLabel,
+                                time = if (last) stop.expectedArrival else stop.expectedDeparture,
+                                scheduled = if (last) stop.scheduledArrival else stop.scheduledDeparture,
+                                realtime = stop.isRealtime,
+                                color = color,
+                                passed = next == null || index < next,
+                                current = index == next,
+                                first = i == 0,
+                                last = last,
+                                onClick = { if (index > info.boardIndex) onAlightStop(stop.stopId) },
+                                tag = when (index) {
+                                    info.boardIndex -> { { StopTag("Felszállás", Color(MapViewModel.START_COLOR)) } }
+                                    info.status.targetIndex -> {
+                                        { StopTag(if (info.alightIndex != null) "Leszállás" else "Végállomás", Color(MapViewModel.END_COLOR)) }
+                                    }
+                                    else -> null
+                                },
                             )
                         }
+                        // Az utolsó megálló ne csússzon a rendszer navigációs sávja alá.
+                        item { Spacer(Modifier.navigationBarsPadding().height(8.dp)) }
                     }
-                },
-            )
-            Button(
-                onClick = onEnd,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error,
-                    contentColor = MaterialTheme.colorScheme.onError,
-                ),
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).height(48.dp),
-            ) {
-                Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null)
-                Spacer(Modifier.width(8.dp))
-                Text("Leszállok", style = MaterialTheme.typography.titleMedium)
-            }
-            Text(
-                if (info?.alightIndex == null) {
-                    "Koppints arra a megállóra, ahol leszállsz: szólunk, mielőtt odaérsz."
-                } else {
-                    "A kijelölt megállóra újra koppintva visszaállíthatod a végállomásra."
-                },
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            )
-            AlertBanner(
-                alerts.forLine(details?.takeIf { it.isLocal }?.line),
-                Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
-            )
-            HorizontalDivider()
-        },
-    ) {
-        when {
-            trip is Load.Error -> item { ErrorBox(trip.message, onRetry) }
-            info == null -> item { LoadingBox() }
-            else -> {
-                val d = info.trip
-                val color = lineColorOf(d.line, d.isLocal)
-                val next = info.status.nextIndex
-                val stops = d.stops.drop(info.boardIndex)
-                itemsIndexed(stops, key = { i, s -> "${i + info.boardIndex}-${s.stopId}" }) { i, stop ->
-                    val index = i + info.boardIndex
-                    val last = index == d.stops.lastIndex
-                    TimelineRow(
-                        name = stop.name,
-                        detail = stop.platformLabel,
-                        time = if (last) stop.expectedArrival else stop.expectedDeparture,
-                        scheduled = if (last) stop.scheduledArrival else stop.scheduledDeparture,
-                        realtime = stop.isRealtime,
-                        color = color,
-                        passed = next == null || index < next,
-                        current = index == next,
-                        first = i == 0,
-                        last = last,
-                        onClick = { if (index > info.boardIndex) onAlightStop(stop.stopId) },
-                        tag = when (index) {
-                            info.boardIndex -> { { StopTag("Felszállás", Color(MapViewModel.START_COLOR)) } }
-                            info.status.targetIndex -> {
-                                { StopTag(if (info.alightIndex != null) "Leszállás" else "Végállomás", Color(MapViewModel.END_COLOR)) }
-                            }
-                            else -> null
-                        },
-                    )
                 }
             }
         }
+    }
+}
+
+/** A behúzott panel sávja, a navigációs alkalmazások alsó sávjának mintájára. */
+@Composable
+private fun RideBar(
+    info: RideInfo?,
+    now: Long,
+    follow: Boolean,
+    canFollow: Boolean,
+    onFollow: () -> Unit,
+    onEnd: () -> Unit,
+    onToggle: () -> Unit,
+) {
+    Row(
+        Modifier.fillMaxWidth().height(RIDE_BAR_HEIGHT).padding(horizontal = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(Modifier.width(RIDE_BUTTON_SLOT), contentAlignment = Alignment.Center) {
+            // Élőben nem látszó buszt, vagy helyzet nélkül az utast nincs mit követni.
+            if (canFollow) {
+                RoundAction(
+                    icon = if (follow) Icons.Default.GpsFixed else Icons.Default.GpsNotFixed,
+                    label = "Követés",
+                    container = if (follow) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHighest,
+                    content = if (follow) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                    onClick = onFollow,
+                )
+            }
+        }
+        Column(
+            Modifier
+                .weight(1f)
+                .fillMaxHeight()
+                .clip(RoundedCornerShape(16.dp))
+                .clickable(onClick = onToggle),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            if (info == null) {
+                Text("Betöltés…", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            } else {
+                val status = info.status
+                val arrival = info.trip.stops[status.targetIndex].expectedArrival
+                Text(
+                    TimeUtil.clock(arrival),
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                )
+                Text(
+                    if (status.phase == RidePhase.ARRIVED) {
+                        "Megérkeztél"
+                    } else {
+                        val left = arrival - now
+                        val time = if (left > 0) TimeUtil.durationText(left) else "most"
+                        "$time · ${status.stopsLeft} megálló"
+                    },
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
+        Box(Modifier.width(RIDE_BUTTON_SLOT), contentAlignment = Alignment.Center) {
+            RoundAction(
+                icon = Icons.AutoMirrored.Filled.Logout,
+                label = "Leszállok",
+                container = MaterialTheme.colorScheme.error,
+                content = MaterialTheme.colorScheme.onError,
+                onClick = onEnd,
+            )
+        }
+    }
+}
+
+@Composable
+private fun RoundAction(icon: ImageVector, label: String, container: Color, content: Color, onClick: () -> Unit) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Surface(onClick = onClick, shape = CircleShape, color = container, contentColor = content, modifier = Modifier.size(52.dp)) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(icon, contentDescription = label, modifier = Modifier.size(26.dp))
+            }
+        }
+        Spacer(Modifier.height(4.dp))
+        Text(label, style = MaterialTheme.typography.labelMedium, maxLines = 1)
     }
 }
 

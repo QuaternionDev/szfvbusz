@@ -201,10 +201,12 @@ fun SzfvBusAppUi(openAlertsRequests: StateFlow<Int> = MutableStateFlow(0)) {
             if (overlays.isNotEmpty()) overlays.removeAt(overlays.lastIndex) else tab = Tab.MAP
         }
 
+        val riding = selection is Selection.Ride
         Scaffold(
             contentWindowInsets = WindowInsets(0),
             bottomBar = {
-                NavigationBar {
+                // Utazás közben a térkép a teljes képernyőt kapja, mint egy navigációs alkalmazásban.
+                if (!(riding && tab == Tab.MAP && overlays.isEmpty())) NavigationBar {
                     Tab.entries.forEach { t ->
                         NavigationBarItem(
                             selected = tab == t && overlays.isEmpty(),
@@ -339,7 +341,6 @@ fun SzfvBusAppUi(openAlertsRequests: StateFlow<Int> = MutableStateFlow(0)) {
 
         // Az indítási figyelmeztetések egymás után jönnek, utánuk a frissítés; utazás közben nem ugranak fel.
         val opened = openedNotice
-        val riding = selection is Selection.Ride
         val queued = launchNotices.firstOrNull()?.takeIf { !riding }
         val pendingUpdate = update?.takeIf { !riding }
         when {
