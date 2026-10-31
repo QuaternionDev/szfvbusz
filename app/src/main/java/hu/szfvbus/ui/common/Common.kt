@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.DirectionsBus
@@ -61,6 +62,7 @@ import hu.szfvbus.SzfvBusApp
 import hu.szfvbus.data.DevTools
 import hu.szfvbus.data.LineColors
 import hu.szfvbus.data.model.Departure
+import hu.szfvbus.data.model.earlyLoginSuspected
 import hu.szfvbus.ui.theme.LocalTransitColors
 import hu.szfvbus.util.TimeUtil
 import hu.szfvbus.util.platformText
@@ -343,6 +345,32 @@ fun LiveBadge(count: Int, modifier: Modifier = Modifier) {
 @Composable
 fun DepartureTime(departure: Departure, now: Long, modifier: Modifier = Modifier) {
     val colors = LocalTransitColors.current
+    // Gyanúsan korai élő időnél a menetrend szerinti idő a fő, a kétes élő érték csak alatta látszik.
+    if (departure.earlyLoginSuspected) {
+        val accent = alertAccent()
+        Column(modifier, horizontalAlignment = Alignment.End) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Default.Warning,
+                    contentDescription = "Lehet, hogy hibás az élő adat",
+                    tint = accent,
+                    modifier = Modifier.size(16.dp),
+                )
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    TimeUtil.relative(departure.scheduled, now),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+            Text(
+                "élő: ${TimeUtil.clock(departure.expected)}?",
+                style = MaterialTheme.typography.bodySmall,
+                color = accent,
+            )
+        }
+        return
+    }
     Column(modifier, horizontalAlignment = Alignment.End) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (departure.isRealtime) {

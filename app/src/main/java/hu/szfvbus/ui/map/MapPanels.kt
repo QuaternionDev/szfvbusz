@@ -84,6 +84,7 @@ import hu.szfvbus.ui.theme.LocalTransitColors
 import hu.szfvbus.util.LineNameComparator
 import hu.szfvbus.data.model.Alert
 import hu.szfvbus.ui.common.AlertBanner
+import hu.szfvbus.ui.common.EarlyLoginWarning
 import hu.szfvbus.ui.common.forLine
 import hu.szfvbus.util.TimeUtil
 import java.time.LocalTime
@@ -409,6 +410,9 @@ fun TripPanel(
                         )
                     }
                 }
+            }
+            if (details?.earlyLoginSuspected == true) {
+                EarlyLoginWarning(Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
             }
             AlertBanner(
                 alerts.forLine(details?.takeIf { it.isLocal }?.line ?: vehicle?.takeIf { it.isLocal }?.line),

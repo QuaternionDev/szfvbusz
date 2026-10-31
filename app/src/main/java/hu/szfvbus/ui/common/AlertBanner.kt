@@ -70,6 +70,42 @@ private fun bannerColors(): BannerColors =
         BannerColors(Color(0xFFFFF3E0), Color(0xFF5D2A00), Color(0xFFE65100))
     }
 
+/**
+ * Figyelmeztetés, ha a járat élő adata gyanúsan sokkal a menetrend előtt jár: a busz valószínűleg még
+ * el sem indult erre a járatra (lásd [hu.szfvbus.data.model.EARLY_LOGIN_SEC]).
+ */
+@Composable
+fun EarlyLoginWarning(modifier: Modifier = Modifier) {
+    val colors = bannerColors()
+    Surface(
+        shape = RoundedCornerShape(14.dp),
+        color = colors.container,
+        contentColor = colors.content,
+        border = BorderStroke(1.dp, colors.accent.copy(alpha = 0.45f)),
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        Row(Modifier.padding(horizontal = 14.dp, vertical = 12.dp)) {
+            Icon(Icons.Default.Warning, contentDescription = null, tint = colors.accent, modifier = Modifier.size(22.dp))
+            Spacer(Modifier.width(10.dp))
+            Column {
+                Text(
+                    "LEHET, HOGY HIBÁS AZ ÉLŐ ADAT",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.accent,
+                )
+                Text(
+                    "Ez a busz jóval a menetrend előtt jár, ezért valószínűleg még el sem indult erre a járatra: " +
+                        "a sofőr korábban jelentkezett be, a busz pedig még az előző útját teszi meg, vagy a " +
+                        "végállomáson áll. Az élő idők és a busz helyzete most félrevezetők, a menetrend szerinti " +
+                        "időkkel számolj.",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+        }
+    }
+}
+
 /** A forgalmi változások borostyán kiemelőszíne. */
 @Composable
 fun alertAccent(): Color = bannerColors().accent

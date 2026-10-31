@@ -154,6 +154,15 @@ data class Departure(
     val serviceDay: Long,
 )
 
+/**
+ * Ennyit a helyi buszok nem sietnek. Ilyenkor jellemzően a sofőr korábban jelentkezett be a járatra,
+ * és a busz még az előző útját teszi meg, vagy a végállomáson áll.
+ */
+const val EARLY_LOGIN_SEC = 15 * 60
+
+/** Az élő idő gyanúsan sokkal a menetrend előtt jár: a busz valószínűleg még el sem indult erre a járatra. */
+val Departure.earlyLoginSuspected: Boolean get() = isRealtime && delaySec <= -EARLY_LOGIN_SEC
+
 data class TripStop(
     val stopId: String,
     val name: String,
@@ -182,6 +191,9 @@ data class TripDetails(
     val stops: List<TripStop>,
 ) {
     val isRealtime get() = stops.any { it.isRealtime }
+
+    /** Valamelyik megállóban gyanúsan korai az élő idő; lásd [EARLY_LOGIN_SEC]. */
+    val earlyLoginSuspected get() = stops.any { it.isRealtime && it.delaySec <= -EARLY_LOGIN_SEC }
 
     /** Késés a következő, még előttünk lévő megállónál, vagy az utolsó ismert késés. */
     fun currentDelay(now: Long): Int? {

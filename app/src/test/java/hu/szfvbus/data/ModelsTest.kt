@@ -13,9 +13,11 @@ import hu.szfvbus.data.model.StopGroup
 import hu.szfvbus.data.model.TripDetails
 import hu.szfvbus.data.model.TripStop
 import hu.szfvbus.data.model.directionGroups
+import hu.szfvbus.data.model.earlyLoginSuspected
 import hu.szfvbus.data.model.noticeQueue
 import hu.szfvbus.data.model.rideStatus
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -188,6 +190,18 @@ class ModelsTest {
         assertNull(trip.nextStopIndex(now = 1000, vehicleNextStop = null))
         assertEquals(3, trip.indexOfStop("x", "S3"))
         assertEquals(4, trip.indexOfStop("s4", null))
+    }
+
+    @Test
+    fun suspiciouslyEarlyBusIsFlagged() {
+        val live = departure("a_1", 100).copy(isRealtime = true)
+        assertFalse(live.copy(delaySec = -5 * 60).earlyLoginSuspected)
+        assertTrue(live.copy(delaySec = -45 * 60).earlyLoginSuspected)
+        // A menetrend szerinti időben nincs mit gyanúsítani.
+        assertFalse(live.copy(delaySec = -45 * 60, isRealtime = false).earlyLoginSuspected)
+        val trip = rideTrip()
+        assertFalse(trip.earlyLoginSuspected)
+        assertTrue(trip.copy(stops = trip.stops.map { it.copy(delaySec = -46 * 60) }).earlyLoginSuspected)
     }
 
     @Test

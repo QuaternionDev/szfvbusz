@@ -56,6 +56,7 @@ import hu.szfvbus.data.model.RideStatus
 import hu.szfvbus.data.model.TripDetails
 import hu.szfvbus.data.model.Vehicle
 import hu.szfvbus.ui.common.AlertBanner
+import hu.szfvbus.ui.common.EarlyLoginWarning
 import hu.szfvbus.ui.common.LineBadge
 import hu.szfvbus.ui.common.forLine
 import hu.szfvbus.ui.common.Load
@@ -104,6 +105,7 @@ fun RideBanner(info: RideInfo, now: Long, modifier: Modifier = Modifier) {
                 board.platformLabel?.let { append("$it · ") }
                 append(if (delay != null) TimeUtil.delayText(delay) else "menetrend szerint")
                 if (info.vehicle == null) append(" · a busz nem látszik élőben")
+                if (trip.earlyLoginSuspected) append("\n⚠ Gyanúsan korai élő adat: a busz valószínűleg még el sem indult")
                 if (info.alightIndex != null) append("\nLeszállás: ${target.name} · ${TimeUtil.clock(target.expectedArrival)}")
             }
         }
@@ -269,6 +271,9 @@ fun RidePanel(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
                     )
+                    if (details?.earlyLoginSuspected == true) {
+                        EarlyLoginWarning(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp))
+                    }
                     AlertBanner(
                         alerts.forLine(details?.takeIf { it.isLocal }?.line),
                         Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
