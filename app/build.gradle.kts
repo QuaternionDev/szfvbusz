@@ -35,6 +35,10 @@ android {
     }
 
     buildTypes {
+        // Saját csomagnévvel a kiadott verzió mellé telepíthető; a neve az src/debug alatt „SzfvBusz Debug”.
+        debug {
+            applicationIdSuffix = ".debug"
+        }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
