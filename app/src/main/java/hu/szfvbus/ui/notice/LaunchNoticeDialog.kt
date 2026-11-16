@@ -66,14 +66,15 @@ private val paragraphBreak = Regex("""</p>\s*(?=<(p|div|h\d)[\s>])""")
 private const val LIVE_COVERAGE_TITLE ="Nem minden busz követhető még élőben"
 
 private const val LIVE_COVERAGE_BODY =
-    "<p>A fehérvári helyi buszokra <b>most szerelik fel a fedélzeti egységeket (OBU)</b>, amelyek GPS " +
-        "alapján küldik a busz helyzetét. A város tájékoztatása szerint (2026. október 7.) " +
-        "<b>nagyjából egy hónapon belül minden helyi busz megkapja</b>.</p>" +
-        "<p>Addig <b>nem minden busz látszik élőben</b>. Ami a térképen látszik, az valós helyzet. Ha egy " +
-        "járat nem látszik, attól még <b>közlekedhet</b>: ilyenkor a menetrend szerinti időket mutatjuk, " +
-        "ÉLŐ jelzés nélkül.</p>" +
-        "<p>A rendszer élesítése után minden járat helyzete és késése megjelenik a MÁV-csoport " +
-        "utastájékoztatásában, így ebben az alkalmazásban is.</p>"
+    "<p>A fehérvári helyi buszokra felszerelték a <b>fedélzeti egységeket (OBU)</b>, amelyek GPS " +
+        "alapján küldik a busz helyzetét. A hivatalos közlemény szerint (2026. november 16.) mára " +
+        "<b>minden helyi busz megkapta</b>.</p>" +
+        "<p>A tapasztalataink szerint azonban <b>még nem minden busz látszik élőben</b>, és várhatóan " +
+        "<b>2027 elejéig</b> lesznek olyan járatok, amelyek nem követhetők. Ami a térképen látszik, az valós " +
+        "helyzet. Ha egy járat nem látszik, attól még <b>közlekedhet</b>: ilyenkor a menetrend szerinti " +
+        "időket mutatjuk, ÉLŐ jelzés nélkül.</p>" +
+        "<p>Ez a figyelmeztetés akkor tűnik el, amikor a tapasztalatok szerint is minden buszon ténylegesen " +
+        "működik az élő követés.</p>"
 
 /** A Székesfehérvár Városportál cikke az OBU-k felszereléséről. */
 private const val OBU_ARTICLE_URL =

@@ -8,10 +8,12 @@ Android alkalmazás Székesfehérvár helyi buszközlekedéséhez.
 > [szfvbuszapp@quaternion.hu](mailto:szfvbuszapp@quaternion.hu) címre.
 
 > [!WARNING]
-> **Nem minden busz követhető még élőben.** A fehérvári helyi buszokra most szerelik fel a
-> fedélzeti egységeket (OBU), a [város tájékoztatása](https://www.szekesfehervar.hu/obu-a-fehervari-buszokon-ujabb-lepes-az-utasbarat-kozossegi-kozlekedes-erdekeben)
-> szerint nagyjából egy hónapon belül minden busz megkapja. Addig ha egy busz nem látszik a
-> térképen, attól még közlekedhet: ilyenkor a menetrend szerinti időket mutatja az app.
+> **Nem minden busz követhető még élőben.** A hivatalos közlemény szerint 2026. november 16-ra
+> minden fehérvári helyi busz megkapta a fedélzeti egységet (OBU), a [város tájékoztatása](https://www.szekesfehervar.hu/obu-a-fehervari-buszokon-ujabb-lepes-az-utasbarat-kozossegi-kozlekedes-erdekeben)
+> az OBU-król itt olvasható. A fejlesztés közbeni tapasztalatok szerint azonban még nem minden busz
+> látszik élőben, és várhatóan 2027 elejéig lesznek nem követhető járatok. Ha egy busz nem látszik a
+> térképen, attól még közlekedhet: ilyenkor a menetrend szerinti időket mutatja az app. A
+> figyelmeztetés akkor kerül le, amikor a tapasztalatok szerint is mindenhol működik az élő követés.
 
 > [!NOTE]
 > **Elindult a Pay&GO: egyes buszokon bankkártyával is lehet jegyet venni.** 2026. november 16-tól
