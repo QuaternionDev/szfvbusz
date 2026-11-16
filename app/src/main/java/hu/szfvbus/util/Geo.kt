@@ -18,3 +18,10 @@ fun bearingDeg(a: GeoPoint, b: GeoPoint): Float {
     val dy = (b.lat - a.lat) * 110_540.0
     return ((Math.toDegrees(atan2(dx, dy)) + 360.0) % 360.0).toFloat()
 }
+
+/** A [p] pontból [eastM] méterrel keletre és [northM] méterrel északra eső pont; sík közelítés. */
+fun offsetM(p: GeoPoint, eastM: Double, northM: Double): GeoPoint =
+    GeoPoint(
+        lat = p.lat + northM / 110_540.0,
+        lon = p.lon + eastM / (111_320.0 * cos(Math.toRadians(p.lat))),
+    )

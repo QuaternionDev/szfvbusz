@@ -56,6 +56,7 @@ import hu.szfvbus.data.model.RideStatus
 import hu.szfvbus.data.model.TripDetails
 import hu.szfvbus.data.model.Vehicle
 import hu.szfvbus.ui.common.AlertBanner
+import hu.szfvbus.ui.common.BetaBadge
 import hu.szfvbus.ui.common.EarlyLoginWarning
 import hu.szfvbus.ui.common.LineBadge
 import hu.szfvbus.ui.common.forLine
@@ -151,13 +152,21 @@ fun RideBanner(info: RideInfo, now: Long, modifier: Modifier = Modifier) {
                 Icon(icon, contentDescription = null, modifier = Modifier.size(36.dp))
                 Spacer(Modifier.width(14.dp))
                 Column(Modifier.weight(1f)) {
-                    Text(
-                        caption,
-                        style = MaterialTheme.typography.labelLarge,
-                        color = Color.White.copy(alpha = 0.88f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            caption,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = Color.White.copy(alpha = 0.88f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false),
+                        )
+                        // Felszállás után a GPS-es navigáció még kísérleti.
+                        if (status.phase != RidePhase.WAITING) {
+                            Spacer(Modifier.width(8.dp))
+                            BetaBadge(container = Color.White.copy(alpha = 0.22f), content = Color.White)
+                        }
+                    }
                     Text(
                         title,
                         style = MaterialTheme.typography.headlineSmall,

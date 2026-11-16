@@ -128,7 +128,7 @@ fun MapScreen(
     val direction by vm.direction.collectAsStateWithLifecycle()
     val follow by vm.follow.collectAsStateWithLifecycle()
     val myLocation by vm.myLocation.collectAsStateWithLifecycle()
-    val myHeading by vm.myHeading.collectAsStateWithLifecycle()
+    val myFix by vm.myFix.collectAsStateWithLifecycle()
     val overlay by vm.overlay.collectAsStateWithLifecycle()
     val prefs by vm.prefs.collectAsStateWithLifecycle()
     val alightStopId by vm.alightStopId.collectAsStateWithLifecycle()
@@ -247,7 +247,7 @@ fun MapScreen(
             controller?.setVehicles(shownVehicles, vehicleColors(shownVehicles), selectedVehicleId)
         }
         LaunchedEffect(controller, overlay) { controller?.setOverlay(overlay) }
-        LaunchedEffect(controller, myLocation, myHeading, boarded) { controller?.setMyLocation(myLocation, myHeading, arrow = boarded) }
+        LaunchedEffect(controller, myFix, boarded) { controller?.setMyLocation(myFix, arrow = boarded) }
         LaunchedEffect(controller) {
             val c = controller ?: return@LaunchedEffect
             vm.camera.collect { cmd ->

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import hu.szfvbus.AppContainer
 import hu.szfvbus.BuildConfig
 import hu.szfvbus.data.DevTools
+import hu.szfvbus.data.LocationFix
 import hu.szfvbus.data.LineColors
 import hu.szfvbus.data.Prefs
 import hu.szfvbus.data.ThemeMode
@@ -132,8 +133,19 @@ class MapViewModel(container: AppContainer) : ViewModel() {
     /** Hogy az utazás követi-e már a buszát, így a térképet elhúzó felhasználót nem rántja vissza. */
     private var rideFollowStarted = false
 
-    /** Felszállt-e már az utas: addig a buszt követi a kamera, utána az utas saját helyzetét. */
-    private var rideBoarded = false
+    /**
+     * Felszállt-e már az utas: addig a buszt követi a kamera, utána az utas saját helyzetét, amely ilyenkor
+     * navigációs sűrűséggel frissül.
+     */
+    private val rideBoardedState = MutableStateFlow(false)
+
+    // A saját JVM-név kell, mert a setter ütközne a nyilvános setRideBoarded() függvénnyel.
+    @get:JvmName("isRideBoarded") @set:JvmName("updateRideBoarded")
+    private var rideBoarded: Boolean
+        get() = rideBoardedState.value
+        set(value) {
+            rideBoardedState.value = value
+        }
 
     /** A városi vonalak forgalmi változásai, sávként az érintett vonalaknál. */
     private val _alerts = MutableStateFlow<List<Alert>>(emptyList())
@@ -164,9 +176,14 @@ class MapViewModel(container: AppContainer) : ViewModel() {
     private val _myLocation = MutableStateFlow<GeoPoint?>(null)
     val myLocation = _myLocation.asStateFlow()
 
-    /** Az utas haladási iránya fokban, két elég távoli helyzetéből számolva. */
-    private val _myHeading = MutableStateFlow<Float?>(null)
-    val myHeading = _myHeading.asStateFlow()
+    /**
+     * Az utas helyzete a térképnek: a [LocationFix.bearing] itt már a megjelenítendő haladási irány
+     * (a GPS iránya, vagy lassú mozgásnál két elég távoli helyzetből számolva).
+     */
+    private val _myFix = MutableStateFlow<LocationFix?>(null)
+    val myFix = _myFix.asStateFlow()
+
+    private var myHeading: Float? = null
 
     /** A helyzet, amelyhez képest a következő irány számolódik. */
     private var headingAnchor: GeoPoint? = null
@@ -243,21 +260,28 @@ class MapViewModel(container: AppContainer) : ViewModel() {
             }
         }
         launch {
-            locationPermissionVersion.collectLatest {
-                locationRepo.updates().collect(::onLocation)
+            // Felszállás után másodpercenkénti GPS kell a navigációhoz, egyébként elég a takarékosabb frissítés.
+            combine(locationPermissionVersion, rideBoardedState) { _, boarded -> boarded }.collectLatest { boarded ->
+                locationRepo.fixes(navigation = boarded).collect(::onLocation)
             }
         }
     }
 
-    private fun onLocation(point: GeoPoint) {
-        // Álló helyzetben a GPS ingadozása ne forgassa a nyilat.
+    private fun onLocation(fix: LocationFix) {
+        val point = fix.point
         val anchor = headingAnchor
-        if (anchor == null || distanceM(anchor, point) >= HEADING_MIN_MOVE_M) {
-            if (anchor != null) _myHeading.value = bearingDeg(anchor, point)
+        if (fix.bearing != null && (fix.speedMps ?: 0f) >= GPS_HEADING_MIN_SPEED) {
+            // Haladás közben a GPS saját iránya a legpontosabb és a legfrissebb.
+            myHeading = fix.bearing
+            headingAnchor = point
+        } else if (anchor == null || distanceM(anchor, point) >= HEADING_MIN_MOVE_M) {
+            // Álló helyzetben a GPS ingadozása ne forgassa a nyilat.
+            if (anchor != null) myHeading = bearingDeg(anchor, point)
             headingAnchor = point
         }
         val first = _myLocation.value == null
         _myLocation.value = point
+        _myFix.value = fix.copy(bearing = myHeading)
         // Ha a felszálláskor még nem volt helyzet, az elsővel indul a navigációs nézet.
         if (first && rideBoarded && _follow.value) _camera.tryEmit(CameraCommand.FollowLocation)
     }
@@ -265,15 +289,21 @@ class MapViewModel(container: AppContainer) : ViewModel() {
     /** Az engedély megadása után újraindítja a helyzetfrissítéseket. */
     fun onLocationPermissionGranted() {
         locationRepo.lastKnown()?.let {
-            _myLocation.value = it
+            setMyPoint(it)
             _camera.tryEmit(CameraCommand.Center(it, 16.0))
         }
         locationPermissionVersion.value++
     }
 
+    /** Ismert helyzet beállítása frissítés nélkül (pl. az utolsó ismert helyzet). */
+    private fun setMyPoint(p: GeoPoint) {
+        _myLocation.value = p
+        if (_myFix.value?.point != p) _myFix.value = LocationFix(p, bearing = myHeading)
+    }
+
     fun centerOnMyLocation(): Boolean {
         val p = _myLocation.value ?: locationRepo.lastKnown() ?: return false
-        _myLocation.value = p
+        setMyPoint(p)
         stopFollowing()
         _camera.tryEmit(CameraCommand.Center(p, 16.0))
         return true
@@ -758,6 +788,7 @@ class MapViewModel(container: AppContainer) : ViewModel() {
                 val alightStop = details.stops[alight]
                 MapOverlay(
                     shapes = listOf(MapShape(details.shape, color)),
+                    navigationRoute = details.shape,
                     routeStops = details.stops.drop(board).map {
                         MapLabeledPoint(GeoPoint(it.lat, it.lon), mapName(it.name, it.platformLabel), color, it.stopId)
                     },
@@ -835,6 +866,8 @@ class MapViewModel(container: AppContainer) : ViewModel() {
 
         /** Ennyi elmozdulás után számol új haladási irányt. */
         const val HEADING_MIN_MOVE_M = 8.0
+        /** Ennél gyorsabb haladásnál (m/s, kb. 5 km/h) a GPS saját iránya mutatja a nyilat. */
+        const val GPS_HEADING_MIN_SPEED = 1.5f
         const val ALERTS_POLL_MS = 10 * 60_000L
         const val UPDATE_CHECK_INTERVAL_MS = 24 * 60 * 60_000L
 

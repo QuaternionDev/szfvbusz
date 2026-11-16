@@ -342,6 +342,27 @@ fun LiveBadge(count: Int, modifier: Modifier = Modifier) {
     }
 }
 
+/** Jelvény a még kísérleti, javításra szoruló funkciók mellé. */
+@Composable
+fun BetaBadge(
+    modifier: Modifier = Modifier,
+    container: Color = MaterialTheme.colorScheme.tertiaryContainer,
+    content: Color = MaterialTheme.colorScheme.onTertiaryContainer,
+) {
+    Text(
+        "BÉTA",
+        color = content,
+        fontWeight = FontWeight.Bold,
+        fontSize = 10.sp,
+        letterSpacing = 0.8.sp,
+        maxLines = 1,
+        modifier = modifier
+            .clip(RoundedCornerShape(50))
+            .background(container)
+            .padding(horizontal = 7.dp, vertical = 2.dp),
+    )
+}
+
 @Composable
 fun DepartureTime(departure: Departure, now: Long, modifier: Modifier = Modifier) {
     val colors = LocalTransitColors.current

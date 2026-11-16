@@ -1,14 +1,20 @@
 package hu.szfvbus.ui.map
 
+import android.animation.TimeAnimator
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.RectF
+import android.os.SystemClock
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.LinearInterpolator
 import hu.szfvbus.data.LineColors
+import hu.szfvbus.data.LocationFix
 import hu.szfvbus.data.model.GeoPoint
 import hu.szfvbus.data.model.Stop
 import hu.szfvbus.data.model.Vehicle
+import hu.szfvbus.util.distanceM
+import hu.szfvbus.util.RouteLine
+import hu.szfvbus.util.offsetM
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
@@ -66,6 +72,9 @@ import org.maplibre.geojson.FeatureCollection
 import org.maplibre.geojson.LineString
 import org.maplibre.geojson.Point
 import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.exp
+import kotlin.math.sin
 
 /** A térképre rajzolt vonallánc (egy járat, egy vonal vagy egy útvonalterv-szakasz). */
 data class MapShape(val points: List<GeoPoint>, val color: Int, val dashed: Boolean = false)
@@ -81,6 +90,8 @@ data class MapOverlay(
     val selectedStops: List<MapLabeledPoint> = emptyList(),
     /** Az útvonalterv kiinduló- és célpontja. */
     val endpoints: List<MapLabeledPoint> = emptyList(),
+    /** Utazás közben a busz útvonala, amelyre felszállás után a navigációs nyíl rátapad. */
+    val navigationRoute: List<GeoPoint> = emptyList(),
 )
 
 /**
@@ -131,7 +142,28 @@ class MapController(
     private var followPaddingTop = 0.0
     private var locationFrame: Frame? = null
     private var locationArrow = false
-    private var locationAnimator: ValueAnimator? = null
+    /**
+     * A legutóbbi helymeghatározás, és a belőle becsült sebesség (m/s) kelet és észak felé. Ha az utas a
+     * busz útvonalán van, [alongM] a helye az útvonal mentén, [alongMps] pedig a haladása rajta.
+     */
+    private class LocationTrack(
+        val fix: LocationFix,
+        val heading: Float?,
+        val eastMps: Double,
+        val northMps: Double,
+        val alongM: Double? = null,
+        val alongMps: Double = 0.0,
+    )
+
+    /** A busz útvonala; felszállás után erre tapad a nyíl, mint egy navigációban az útra. */
+    private var navigationRoute: RouteLine? = null
+    /** A nyíl kirajzolt helye az útvonal mentén, amíg rátapad. */
+    private var shownAlongM: Double? = null
+
+    private var locationTrack: LocationTrack? = null
+    private var navigationRoutePoints: List<GeoPoint>? = null
+    /** Képkockánként mozgatja az utas nyilát, amíg van hová. */
+    private var locationTicker: TimeAnimator? = null
 
     private val followCallback = object : MapLibreMap.CancelableCallback {
         override fun onCancel() {
@@ -346,6 +378,12 @@ class MapController(
     }
 
     fun setOverlay(overlay: MapOverlay) {
+        val route = overlay.navigationRoute.takeIf { it.size >= 2 }
+        if (route != navigationRoutePoints) {
+            navigationRoutePoints = route
+            navigationRoute = route?.let { RouteLine(it) }?.takeIf { it.isUsable }
+            shownAlongM = null
+        }
         shapesSource.setGeoJson(
             FeatureCollection.fromFeatures(
                 overlay.shapes.filter { it.points.size >= 2 }.map { shape ->
@@ -391,33 +429,147 @@ class MapController(
     }
 
     /**
-     * Az utas helyzete: kék pont, utazás közben ([arrow]) a haladási irányba ([heading]) forgatott nyíl.
-     * A kis elmozdulásokat simán csúsztatja, és navigációs követésnél a kamerát is viszi.
+     * Az utas helyzete: kék pont, utazás közben ([arrow]) a haladási irányba forgatott nyíl.
+     *
+     * Mint egy navigációs alkalmazásban, a nyíl nem ugrál mérésről mérésre: két mérés között a sebességéből
+     * előre becsülve halad tovább, az új mérés pedig csak finoman igazít rajta. A kamera navigációs
+     * követésnél képkockánként vele mozog és fordul.
      */
-    fun setMyLocation(point: GeoPoint?, heading: Float?, arrow: Boolean) {
+    fun setMyLocation(fix: LocationFix?, arrow: Boolean) {
+        val arrowChanged = arrow != locationArrow
         locationArrow = arrow
-        locationAnimator?.cancel()
-        val start = locationFrame
-        val target = point?.let { Frame(it.lat, it.lon, heading ?: start?.heading) }
-        if (start == null || target == null || isFar(start, target)) {
-            renderLocation(target)
+        val previous = locationTrack
+        if (fix == null) {
+            stopLocationTicker()
+            locationTrack = null
+            renderLocation(null)
             return
         }
-        locationAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = ANIMATION_MS
-            interpolator = LinearInterpolator()
-            addUpdateListener {
-                val t = it.animatedValue as Float
-                renderLocation(
-                    Frame(
-                        lat = start.lat + (target.lat - start.lat) * t,
-                        lon = start.lon + (target.lon - start.lon) * t,
-                        heading = lerpAngle(start.heading, target.heading, t),
-                    ),
-                )
+        if (fix == previous?.fix) {
+            if (arrowChanged) renderLocation(locationFrame)
+            return
+        }
+        val heading = fix.bearing ?: previous?.heading
+        val (east, north) = velocity(fix, heading, previous)
+        locationTrack = snapToRoute(fix, arrow, previous)?.let { (along, alongSpeed) ->
+            LocationTrack(fix, heading, east, north, along, alongSpeed)
+        } ?: LocationTrack(fix, heading, east, north)
+        val shown = locationFrame
+        val target = Frame(fix.point.lat, fix.point.lon, heading)
+        if (shown == null || isFar(shown, target)) renderLocation(target)
+        startLocationTicker()
+    }
+
+    /**
+     * Felszállás után ([arrow]) a busz útvonalára vetíti a helyzetet, ha elég közel van hozzá. Visszaadja a
+     * helyet az útvonal mentén és a haladás sebességét rajta (m/s); az útvonaltól messze null.
+     */
+    private fun snapToRoute(fix: LocationFix, arrow: Boolean, previous: LocationTrack?): Pair<Double, Double>? {
+        val route = navigationRoute?.takeIf { arrow } ?: return null
+        val near = previous?.alongM ?: shownAlongM
+        val projection = route.project(fix.point, near) ?: return null
+        if (projection.offM > SNAP_MAX_OFF_M) return null
+        val along = projection.alongM
+        val gpsSpeed = fix.speedMps
+        val speed = when {
+            gpsSpeed != null -> gpsSpeed.toDouble()
+            previous?.alongM != null -> {
+                val dt = (fix.receivedMs - previous.fix.receivedMs) / 1000.0
+                if (dt in 0.3..8.0) (along - previous.alongM) / dt else 0.0
             }
+            else -> 0.0
+        }
+        // A busz nem tolat: a visszafelé mutató becslés csak a GPS ingadozása.
+        return along to if (speed in MIN_MOVING_SPEED..MAX_PREDICTED_SPEED) speed else 0.0
+    }
+
+    /**
+     * Becsült sebesség kelet és észak felé (m/s). A GPS saját sebességét használja, ha van; különben
+     * (hálózati vagy fejlesztői helyzetnél) az előző méréstől megtett útból számol.
+     */
+    private fun velocity(fix: LocationFix, heading: Float?, previous: LocationTrack?): Pair<Double, Double> {
+        val speed = fix.speedMps
+        if (speed != null && heading != null) {
+            if (speed < MIN_MOVING_SPEED) return 0.0 to 0.0
+            val rad = Math.toRadians(heading.toDouble())
+            return speed * sin(rad) to speed * cos(rad)
+        }
+        val prev = previous?.fix ?: return 0.0 to 0.0
+        val dt = (fix.receivedMs - prev.receivedMs) / 1000.0
+        if (dt < 0.3 || dt > 8.0) return 0.0 to 0.0
+        val dist = distanceM(prev.point, fix.point)
+        val speedFromMove = dist / dt
+        if (speedFromMove < MIN_MOVING_SPEED || speedFromMove > MAX_PREDICTED_SPEED || dist == 0.0) return 0.0 to 0.0
+        val east = (fix.point.lon - prev.point.lon) * 111_320.0 * cos(Math.toRadians(fix.point.lat))
+        val north = (fix.point.lat - prev.point.lat) * 110_540.0
+        return east / dt to north / dt
+    }
+
+    private fun startLocationTicker() {
+        if (locationTicker != null) return
+        locationTicker = TimeAnimator().apply {
+            setTimeListener { _, _, deltaMs -> tickLocation(deltaMs) }
             start()
         }
+    }
+
+    private fun stopLocationTicker() {
+        locationTicker?.cancel()
+        locationTicker = null
+    }
+
+    /**
+     * Egy képkocka: a kirajzolt helyzet a becsült valódi helyzet felé simul. Az útvonalon a nyíl az út
+     * ívén halad és az út irányába fordul, így kanyarban sem vágja le az ívet, és nem kígyózik.
+     */
+    private fun tickLocation(deltaMs: Long) {
+        val track = locationTrack ?: return stopLocationTicker()
+        val ageMs = (SystemClock.elapsedRealtime() - track.fix.receivedMs).coerceIn(0L, MAX_PREDICTION_MS)
+        val ageSec = ageMs / 1000.0
+        val dt = deltaMs.coerceIn(0L, 100L).toDouble()
+        val route = navigationRoute
+        val moving: Boolean
+        val target: Frame
+        val positionSmoothingMs: Double
+        if (track.alongM != null && route != null) {
+            val predicted = (track.alongM + track.alongMps * ageSec).coerceAtMost(route.length)
+            val previous = shownAlongM
+            val along = when {
+                previous == null || abs(predicted - previous) > SNAP_JUMP_M -> predicted
+                // Kis visszafelé igazítás helyett megvárja, amíg a becslés utoléri; így a nyíl nem rángat hátra.
+                predicted < previous && previous - predicted < SNAP_BACKTRACK_M -> previous
+                else -> previous + (predicted - previous) * (1 - exp(-dt / POSITION_SMOOTHING_MS))
+            }
+            shownAlongM = along
+            val p = route.pointAt(along)
+            target = Frame(p.lat, p.lon, route.bearingAt(along))
+            moving = track.alongMps > 0.0 && ageMs < MAX_PREDICTION_MS || abs(predicted - along) > 0.05
+            positionSmoothingMs = ROUTE_BLEND_MS
+        } else {
+            shownAlongM = null
+            val predicted = offsetM(track.fix.point, track.eastMps * ageSec, track.northMps * ageSec)
+            target = Frame(predicted.lat, predicted.lon, track.heading)
+            moving = (track.eastMps != 0.0 || track.northMps != 0.0) && ageMs < MAX_PREDICTION_MS
+            positionSmoothingMs = POSITION_SMOOTHING_MS
+        }
+        val shown = locationFrame ?: target
+        val k = 1 - exp(-dt / positionSmoothingMs)
+        val kh = (1 - exp(-dt / HEADING_SMOOTHING_MS)).toFloat()
+        val frame = Frame(
+            lat = shown.lat + (target.lat - shown.lat) * k,
+            lon = shown.lon + (target.lon - shown.lon) * k,
+            heading = lerpAngle(shown.heading, target.heading, kh),
+        )
+        renderLocation(frame)
+        // Ha már nem mozog és odaért, leáll, hogy álló helyzetben ne fogyassza az akkut.
+        val settled = abs(frame.lat - target.lat) < 1e-7 && abs(frame.lon - target.lon) < 1e-7 &&
+            angleDiff(frame.heading, target.heading) < 0.5f
+        if (!moving && settled) stopLocationTicker()
+    }
+
+    private fun angleDiff(a: Float?, b: Float?): Float {
+        if (a == null || b == null) return 0f
+        return abs(((b - a + 540f) % 360f) - 180f)
     }
 
     private fun renderLocation(frame: Frame?) {
@@ -648,8 +800,7 @@ class MapController(
     fun dispose() {
         animator?.cancel()
         animator = null
-        locationAnimator?.cancel()
-        locationAnimator = null
+        stopLocationTicker()
         map.removeOnMapClickListener(clickListener)
         map.removeOnMapLongClickListener(longClickListener)
         map.removeOnCameraMoveStartedListener(moveStartedListener)
@@ -659,6 +810,23 @@ class MapController(
         val CITY_CENTER = LatLng(47.1910, 18.4105)
         const val DEFAULT_ZOOM = 13.2
         const val ANIMATION_MS = 1500L
+        /** Legfeljebb ennyi ideig becsüli előre a helyzetet új mérés nélkül. */
+        private const val MAX_PREDICTION_MS = 2000L
+        /** Mennyire simán (milyen időállandóval) követi a nyíl a becsült helyzetet és irányt. */
+        private const val POSITION_SMOOTHING_MS = 250.0
+        private const val HEADING_SMOOTHING_MS = 300.0
+        /** Az útvonalra tapadáskor és onnan leválva ennyi idő alatt simul át a nyíl (ms). */
+        private const val ROUTE_BLEND_MS = 120.0
+        /** Ennél messzebb (m) az útvonaltól nem tapad rá a nyíl; ilyenkor valószínűleg nem a buszon van az utas. */
+        private const val SNAP_MAX_OFF_M = 40.0
+        /** Ekkora eltérésnél (m) az útvonal mentén nem csúszik, hanem azonnal odaugrik. */
+        private const val SNAP_JUMP_M = 150.0
+        /** Ennyi (m) visszafelé eltérést a GPS ingadozásának vesz, és nem viszi vissza miatta a nyilat. */
+        private const val SNAP_BACKTRACK_M = 25.0
+        /** Ez alatt (m/s) állónak veszi az utast, így a GPS ingadozását nem viszi tovább. */
+        private const val MIN_MOVING_SPEED = 0.7
+        /** Ennél gyorsabb (m/s) becslés biztosan mérési hiba. */
+        private const val MAX_PREDICTED_SPEED = 35.0
         val FONT = arrayOf("Noto Sans Regular")
         val FONT_BOLD = arrayOf("Noto Sans Bold")
 

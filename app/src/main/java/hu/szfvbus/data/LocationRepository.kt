@@ -8,6 +8,7 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Looper
+import android.os.SystemClock
 import androidx.core.content.ContextCompat
 import hu.szfvbus.data.model.GeoPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -18,6 +19,17 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+
+/**
+ * Egy helymeghatározás. A [bearing] és a [speedMps] csak akkor van meg, ha a GPS mérte; a [receivedMs]
+ * a beérkezés ideje [SystemClock.elapsedRealtime] szerint, ebből becsülhető a mozgás két mérés között.
+ */
+data class LocationFix(
+    val point: GeoPoint,
+    val bearing: Float? = null,
+    val speedMps: Float? = null,
+    val receivedMs: Long = SystemClock.elapsedRealtime(),
+)
 
 /**
  * Helymeghatározás a rendszer LocationManagerével (GPS + hálózat), így nem kell hozzá Play Services.
@@ -43,39 +55,73 @@ class LocationRepository(private val context: Context) {
     }
 
     /** Kiadja a legjobb helyzetet, ahogy pontosodik; engedély nélkül üres. */
+    fun updates(): Flow<GeoPoint> = fixes(navigation = false).map { it.point }.distinctUntilChanged()
+
+    /**
+     * Helymeghatározások iránnyal és sebességgel. [navigation] módban másodpercenként kéri a GPS-t, és
+     * minden GPS-mérést továbbad, mint egy navigációs alkalmazás; egyébként takarékosabban, 3 másodpercenként.
+     */
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun updates(minTimeMs: Long = 3000): Flow<GeoPoint> =
+    fun fixes(navigation: Boolean): Flow<LocationFix> =
         DevTools.state.map { it.fakeLocation }.distinctUntilChanged().flatMapLatest { fake ->
-            if (fake != null) flowOf(fake) else systemUpdates(minTimeMs)
+            if (fake != null) flowOf(LocationFix(fake)) else systemUpdates(navigation)
         }
 
     @SuppressLint("MissingPermission")
-    private fun systemUpdates(minTimeMs: Long): Flow<GeoPoint> = callbackFlow {
+    private fun systemUpdates(navigation: Boolean): Flow<LocationFix> = callbackFlow {
         if (!hasPermission()) {
             close()
             return@callbackFlow
         }
         var best: Location? = null
+        var lastGpsMs = 0L
         val listener = LocationListener { loc ->
+            val now = SystemClock.elapsedRealtime()
+            val gps = loc.provider == LocationManager.GPS_PROVIDER
+            if (gps) lastGpsMs = now
             val current = best
-            // A friss helymeghatározás az előnyös; pontatlanabbat csak akkor fogad el, ha az előző már régi.
-            if (current == null || loc.accuracy <= current.accuracy || loc.time - current.time > 15_000) {
+            val accept = if (navigation) {
+                // Navigációnál minden GPS-mérés kell; a pontatlanabb hálózati helyzet csak akkor, ha a GPS elhallgatott.
+                gps || now - lastGpsMs > GPS_SILENT_MS
+            } else {
+                // A friss helymeghatározás az előnyös; pontatlanabbat csak akkor fogad el, ha az előző már régi.
+                current == null || loc.accuracy <= current.accuracy || loc.time - current.time > 15_000
+            }
+            if (accept) {
                 best = loc
-                trySend(loc.toGeoPoint())
+                trySend(
+                    LocationFix(
+                        point = loc.toGeoPoint(),
+                        bearing = if (gps && loc.hasBearing()) loc.bearing else null,
+                        speedMps = if (gps && loc.hasSpeed()) loc.speed else null,
+                        receivedMs = now,
+                    ),
+                )
             }
         }
-        lastKnown()?.let { trySend(it) }
+        lastKnown()?.let { trySend(LocationFix(it)) }
         for (provider in providers()) {
             runCatching {
-                manager.requestLocationUpdates(provider, minTimeMs, 5f, listener, Looper.getMainLooper())
+                if (navigation) {
+                    manager.requestLocationUpdates(provider, NAVIGATION_INTERVAL_MS, 0f, listener, Looper.getMainLooper())
+                } else {
+                    manager.requestLocationUpdates(provider, NORMAL_INTERVAL_MS, 5f, listener, Looper.getMainLooper())
+                }
             }
         }
         awaitClose { manager.removeUpdates(listener) }
-    }.distinctUntilChanged()
+    }
 
     private fun providers(): List<String> =
         listOf(LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER)
             .filter { runCatching { manager.isProviderEnabled(it) }.getOrDefault(false) }
 
     private fun Location.toGeoPoint() = GeoPoint(latitude, longitude)
+
+    private companion object {
+        const val NORMAL_INTERVAL_MS = 3000L
+        const val NAVIGATION_INTERVAL_MS = 1000L
+        /** Ennyi GPS-csend után a navigáció a hálózati helyzetet is elfogadja. */
+        const val GPS_SILENT_MS = 5000L
+    }
 }

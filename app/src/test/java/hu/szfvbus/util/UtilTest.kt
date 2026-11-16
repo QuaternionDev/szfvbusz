@@ -29,6 +29,32 @@ class UtilTest {
     }
 
     @Test
+    fun offsetMovesByMeters() {
+        val start = GeoPoint(47.19, 18.41)
+        val moved = offsetM(start, eastM = 30.0, northM = 40.0)
+        assertEquals(50.0, distanceM(start, moved), 0.5)
+        assertEquals(36.87f, bearingDeg(start, moved), 0.5f)
+    }
+
+    @Test
+    fun routeLineSnapsAndWalksAlongTheRoute() {
+        // L alakú út: 100 m kelet felé, aztán 100 m észak felé.
+        val corner = offsetM(GeoPoint(47.19, 18.41), 100.0, 0.0)
+        val route = RouteLine(listOf(GeoPoint(47.19, 18.41), corner, offsetM(corner, 0.0, 100.0)))
+        assertEquals(200.0, route.length, 1.0)
+        // Az úttól 10 méterre délre álló utas a vonal 50. méterére esik.
+        val projection = route.project(offsetM(GeoPoint(47.19, 18.41), 50.0, -10.0))!!
+        assertEquals(50.0, projection.alongM, 1.0)
+        assertEquals(10.0, projection.offM, 1.0)
+        assertEquals(0.0, distanceM(corner, route.pointAt(100.0)), 1.0)
+        // Egyenesen kelet felé, a kanyar után észak felé; a kanyarban már fordul.
+        assertEquals(90f, route.bearingAt(30.0), 1f)
+        assertEquals(0f, route.bearingAt(170.0), 1f)
+        val turning = route.bearingAt(97.0)
+        assertTrue(turning > 5f && turning < 85f)
+    }
+
+    @Test
     fun decodesEmptyPolyline() {
         assertTrue(Polyline.decode(null).isEmpty())
         assertTrue(Polyline.decode("").isEmpty())
