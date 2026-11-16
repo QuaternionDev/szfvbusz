@@ -25,6 +25,7 @@ import hu.szfvbus.data.model.RidePhase
 import hu.szfvbus.data.model.RouteDetails
 import hu.szfvbus.data.model.TripDetails
 import hu.szfvbus.data.model.Vehicle
+import hu.szfvbus.data.model.keepNewestVehicles
 import hu.szfvbus.ui.common.Load
 import hu.szfvbus.ui.common.userMessage
 import hu.szfvbus.util.DevClock
@@ -325,7 +326,7 @@ class MapViewModel(container: AppContainer) : ViewModel() {
         try {
             val net = (_network.value as? Load.Success)?.data
             val simulated = if (DevTools.current.simulateVehicles && net != null) simulator.vehicles(net) else emptyList()
-            allVehicles.value = repo.vehicles() + simulated
+            allVehicles.value = keepNewestVehicles(allVehicles.value, repo.vehicles() + simulated)
             _vehiclesUpdatedAt.value = TimeUtil.nowSec()
             _vehicleError.value = null
             moveRideTestPassenger()

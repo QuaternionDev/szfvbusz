@@ -140,6 +140,21 @@ data class Vehicle(
     val stopStatus: String?,
 )
 
+/**
+ * A szerver időnként egy régebbi pillanatképet ad vissza (mérve 5–90 másodperccel korábbit), amitől a
+ * buszok visszaugranának, majd a következő lekérdezéskor újra előre. Ahol a [fresh] adat régebbi a
+ * [previous] listában már ismertnél, a jármű az ismert, frissebb állapotában marad.
+ */
+fun keepNewestVehicles(previous: List<Vehicle>, fresh: List<Vehicle>): List<Vehicle> {
+    if (previous.isEmpty()) return fresh
+    val known = previous.associateBy { it.id }
+    return fresh.map { v ->
+        val old = known[v.id]
+        // Időbélyeg nélküli (0) adatnál nincs mihez mérni, az mindig elfogadott.
+        if (old != null && v.lastUpdated in 1 until old.lastUpdated) old else v
+    }
+}
+
 data class Departure(
     val tripId: String,
     val stopId: String,

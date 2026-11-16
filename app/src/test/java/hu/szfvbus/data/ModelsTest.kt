@@ -12,6 +12,8 @@ import hu.szfvbus.data.model.Stop
 import hu.szfvbus.data.model.StopGroup
 import hu.szfvbus.data.model.TripDetails
 import hu.szfvbus.data.model.TripStop
+import hu.szfvbus.data.model.Vehicle
+import hu.szfvbus.data.model.keepNewestVehicles
 import hu.szfvbus.data.model.directionGroups
 import hu.szfvbus.data.model.earlyLoginSuspected
 import hu.szfvbus.data.model.noticeQueue
@@ -202,6 +204,18 @@ class ModelsTest {
         val trip = rideTrip()
         assertFalse(trip.earlyLoginSuspected)
         assertTrue(trip.copy(stops = trip.stops.map { it.copy(delaySec = -46 * 60) }).earlyLoginSuspected)
+    }
+
+    @Test
+    fun olderSnapshotDoesNotMoveBusesBack() {
+        fun bus(id: String, lat: Double, ts: Long) =
+            Vehicle(id, id, lat, 18.41, null, null, ts, null, null, "42", "Börgönd", true, null, null)
+        val previous = listOf(bus("a", 47.20, 1000), bus("b", 47.20, 1000))
+        val fresh = listOf(bus("a", 47.19, 990), bus("b", 47.21, 1010), bus("c", 47.19, 900), bus("a2", 47.19, 0))
+        val merged = keepNewestVehicles(previous, fresh)
+        // A régebbi adatú „a” a helyén marad, a frissebb „b” lép, az új járművek megjelennek.
+        assertEquals(listOf(47.20, 47.21, 47.19, 47.19), merged.map { it.lat })
+        assertEquals(listOf(1000L, 1010L, 900L, 0L), merged.map { it.lastUpdated })
     }
 
     @Test
