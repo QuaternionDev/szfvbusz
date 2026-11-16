@@ -99,7 +99,8 @@ sealed interface Overlay {
 @Composable
 fun SzfvBusAppUi(openAlertsRequests: StateFlow<Int> = MutableStateFlow(0)) {
     val mapVm: MapViewModel = viewModel(factory = appViewModelFactory { MapViewModel(it) })
-    val themeMode = mapVm.prefs.collectAsStateWithLifecycle().value.themeMode
+    val appPrefs = mapVm.prefs.collectAsStateWithLifecycle().value
+    val themeMode = appPrefs.themeMode
     val darkTheme = when (themeMode) {
         ThemeMode.SYSTEM -> isSystemInDarkTheme()
         ThemeMode.LIGHT -> false
@@ -116,7 +117,7 @@ fun SzfvBusAppUi(openAlertsRequests: StateFlow<Int> = MutableStateFlow(0)) {
             }
         }
     }
-    SzfvBusTheme(darkTheme) {
+    SzfvBusTheme(darkTheme, appPrefs.colorTheme) {
         val context = LocalContext.current
         val container = (context.applicationContext as SzfvBusApp).container
         val plannerVm: PlannerViewModel = viewModel(factory = appViewModelFactory { PlannerViewModel(it) })

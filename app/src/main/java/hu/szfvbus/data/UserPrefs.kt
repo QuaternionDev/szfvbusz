@@ -24,6 +24,7 @@ data class Prefs(
     val favoriteDirections: Set<String> = emptySet(),
     val showIntercity: Boolean = false,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
+    val colorTheme: ColorTheme = ColorTheme.SZFVBUSZ,
     /** Értesítések az új forgalmi változásokról. */
     val notifyAlerts: Boolean = true,
     /** A rejtett fejlesztői mód, a Névjegyből kapcsolható be. */
@@ -48,12 +49,19 @@ enum class ThemeMode(val label: String) {
     DARK("Sötét"),
 }
 
+/** Az alkalmazás színvilága, a világos/sötét módtól függetlenül választható. */
+enum class ColorTheme(val label: String, val description: String) {
+    SZFVBUSZ("SzfvBusz", "Az alapértelmezett kék"),
+    BUDAPESTGO("BudapestGO", "A BudapestGO alkalmazás lilája"),
+}
+
 class UserPrefs(private val context: Context) {
     private val favStopsKey = stringSetPreferencesKey("favorite_stops")
     private val favLinesKey = stringSetPreferencesKey("favorite_lines")
     private val favDirectionsKey = stringSetPreferencesKey("favorite_directions")
     private val intercityKey = booleanPreferencesKey("show_intercity")
     private val themeKey = stringPreferencesKey("theme_mode")
+    private val colorThemeKey = stringPreferencesKey("color_theme")
     private val notifyKey = booleanPreferencesKey("notify_alerts")
     private val devModeKey = booleanPreferencesKey("dev_mode")
     private val seenAlertsKey = stringSetPreferencesKey("seen_alerts")
@@ -70,6 +78,7 @@ class UserPrefs(private val context: Context) {
             favoriteDirections = p[favDirectionsKey].orEmpty(),
             showIntercity = p[intercityKey] ?: false,
             themeMode = ThemeMode.entries.firstOrNull { it.name == p[themeKey] } ?: ThemeMode.SYSTEM,
+            colorTheme = ColorTheme.entries.firstOrNull { it.name == p[colorThemeKey] } ?: ColorTheme.SZFVBUSZ,
             notifyAlerts = p[notifyKey] ?: true,
             devMode = p[devModeKey] ?: false,
             hiddenNotices = p[hiddenNoticesKey].orEmpty(),
@@ -150,6 +159,10 @@ class UserPrefs(private val context: Context) {
 
     suspend fun setThemeMode(mode: ThemeMode) {
         context.dataStore.edit { it[themeKey] = mode.name }
+    }
+
+    suspend fun setColorTheme(theme: ColorTheme) {
+        context.dataStore.edit { it[colorThemeKey] = theme.name }
     }
 
     private suspend fun toggle(key: Preferences.Key<Set<String>>, value: String) {

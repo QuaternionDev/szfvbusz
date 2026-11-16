@@ -54,7 +54,8 @@ Android alkalmazás Székesfehérvár helyi buszközlekedéséhez.
   mindig az élő követésről szóló az első), az érintett vonalaknál sárga bannerként, és az
   újakról értesítés is jön. A megállók és az útvonal ilyenkor nem változnak, az eltérést a
   hír írja le.
-- **Beállítások**: téma (rendszer szerint / világos / sötét), a helyközi buszok megjelenítése
+- **Beállítások**: téma (rendszer szerint / világos / sötét) és színvilág (SzfvBusz vagy BudapestGO
+  színek), a helyközi buszok megjelenítése
   és az értesítések ki- és bekapcsolása. A Változásnaplóban az eddigi verziók változásai
   olvashatók.
 - **Fejlesztői mód** (rejtett): tesztfunkciók, többek közt az idő eltolása, szimulált buszok

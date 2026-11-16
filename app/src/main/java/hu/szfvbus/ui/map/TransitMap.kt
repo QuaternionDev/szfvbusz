@@ -1,6 +1,7 @@
 package hu.szfvbus.ui.map
 
 import android.view.Gravity
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -10,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
@@ -108,14 +110,16 @@ fun TransitMap(
         m.uiSettings.setAttributionMargins(side + with(density) { Dp(90f).roundToPx() }, top + side, 0, 0)
     }
 
-    LaunchedEffect(map, darkTheme) {
+    // A megállók körvonala a színtéma fő színe; témaváltáskor a stílus is újratöltődik.
+    val accent = MaterialTheme.colorScheme.primary.toArgb()
+    LaunchedEffect(map, darkTheme, accent) {
         val m = map ?: return@LaunchedEffect
         controller?.dispose()
         controller = null
         currentOnController(null)
         val url = if (darkTheme) MapController.STYLE_DARK else MapController.STYLE_LIGHT
         m.setStyle(url) { style ->
-            val c = MapController(context, m, style, darkTheme)
+            val c = MapController(context, m, style, darkTheme, accent)
             controller = c
             currentOnController(c)
         }

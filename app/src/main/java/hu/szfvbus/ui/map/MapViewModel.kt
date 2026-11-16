@@ -8,6 +8,7 @@ import hu.szfvbus.data.DevTools
 import hu.szfvbus.data.LocationFix
 import hu.szfvbus.data.LineColors
 import hu.szfvbus.data.Prefs
+import hu.szfvbus.data.ColorTheme
 import hu.szfvbus.data.ThemeMode
 import hu.szfvbus.data.VehicleSimulator
 import hu.szfvbus.data.api.AppRelease
@@ -693,6 +694,10 @@ class MapViewModel(container: AppContainer) : ViewModel() {
 
     fun setThemeMode(mode: ThemeMode) {
         viewModelScope.launch { userPrefs.setThemeMode(mode) }
+    }
+
+    fun setColorTheme(theme: ColorTheme) {
+        viewModelScope.launch { userPrefs.setColorTheme(theme) }
     }
 
     fun setNotifyAlerts(on: Boolean) {

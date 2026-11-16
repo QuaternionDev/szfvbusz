@@ -103,6 +103,8 @@ class MapController(
     private val map: MapLibreMap,
     private val style: Style,
     private val darkTheme: Boolean,
+    /** A színtéma fő színe (ARGB), a megállók körvonalához. */
+    private val accent: Int,
 ) {
     var onVehicleClick: ((vehicleId: String) -> Unit)? = null
     var onStopClick: ((stopId: String) -> Unit)? = null
@@ -198,7 +200,7 @@ class MapController(
             endpointsSource, locationSource, vehiclesSource,
         ).forEach(style::addSource)
 
-        val stopStroke = if (darkTheme) "#9CCBFF" else "#0D5C91"
+        val stopStroke = String.format("#%06X", accent and 0xFFFFFF)
         val surface = if (darkTheme) "#1D2024" else "#FFFFFF"
         val labelColor = if (darkTheme) "#E2E2E6" else "#1A1C1E"
         val halo = if (darkTheme) "#111418" else "#FFFFFF"

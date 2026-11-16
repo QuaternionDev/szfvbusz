@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -70,6 +71,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
@@ -84,7 +86,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import hu.szfvbus.BuildConfig
 import hu.szfvbus.R
+import hu.szfvbus.data.ColorTheme
 import hu.szfvbus.data.ThemeMode
+import hu.szfvbus.ui.theme.previewColor
 import hu.szfvbus.data.model.GeoPoint
 import hu.szfvbus.data.model.LegMode
 import hu.szfvbus.data.model.Place
@@ -402,6 +406,38 @@ fun MapScreen(
                             RadioButton(selected = prefs.themeMode == mode, onClick = null)
                             Spacer(Modifier.width(12.dp))
                             Text(mode.label, style = MaterialTheme.typography.bodyLarge)
+                        }
+                    }
+                    Text(
+                        "Színvilág",
+                        style = MaterialTheme.typography.titleSmall,
+                        modifier = Modifier.padding(top = 16.dp, bottom = 4.dp),
+                    )
+                    ColorTheme.entries.forEach { theme ->
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .clickable { vm.setColorTheme(theme) }
+                                .padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            RadioButton(selected = prefs.colorTheme == theme, onClick = null)
+                            Spacer(Modifier.width(12.dp))
+                            Box(
+                                Modifier
+                                    .size(20.dp)
+                                    .clip(CircleShape)
+                                    .background(theme.previewColor(darkTheme)),
+                            )
+                            Spacer(Modifier.width(12.dp))
+                            Column {
+                                Text(theme.label, style = MaterialTheme.typography.bodyLarge)
+                                Text(
+                                    theme.description,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
                         }
                     }
                 }

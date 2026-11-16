@@ -55,6 +55,10 @@ val RELEASES = listOf(
         "0.6.0",
         listOf(
             new(
+                "Színvilág választó a Téma menüben: az alapértelmezett kék mellett BudapestGO színekkel is " +
+                    "használható az alkalmazás, világos és sötét módban is.",
+            ),
+            new(
                 "Pay&GO: bankkártya ikon jelöli azokat a buszokat, amelyeken bankkártyával, telefonnal vagy " +
                     "okosórával is vehetsz jegyet (a járat adatainál, utazás közben és az indulási listákban). " +
                     "Az indításkor megjelenő tájékoztató elmondja a részleteket. A jelölés még néhol pontatlan lehet.",
