@@ -17,7 +17,7 @@ Android alkalmazás Székesfehérvár helyi buszközlekedéséhez.
 > **Elindult a Pay&GO: egyes buszokon bankkártyával is lehet jegyet venni.** 2026. november 16-tól
 > a fehérvári helyi buszok egy részén, egyelőre tesztüzemben 36 járművön bankkártyával, telefonnal
 > vagy okosórával is vehető vonaljegy. A lehetőség nem vonalhoz, hanem buszhoz kötött: a MÁV
-> tájékoztatása szerint az RVY rendszámú csuklós és az elektromos buszokon biztosan van készülék.
+> tájékoztatása szerint az RVY rendszámú csuklós (új csuklós Mercedes) és az elektromos buszokon biztosan van készülék.
 > Ezeket a buszokat az alkalmazás **bankkártya ikonnal** jelöli. **A jelölés még néhol pontatlan
 > lehet**, mert a készülékkel rendelkező buszokat mi is folyamatosan vesszük fel. További
 > információ: [MÁV-csoport – Pay&GO](https://www.mavcsoport.hu/payandgo).

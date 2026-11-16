@@ -91,7 +91,7 @@ private const val PAY_AND_GO_BODY =
         "<b>bankkártyával, telefonnal vagy okosórával</b> is vehetsz vonaljegyet (Pay&amp;GO): csak érintsd " +
         "a kártyát a buszon lévő készülékhez. Nem kell regisztrálni, sem alkalmazást letölteni.</p>" +
         "<p><b>Melyik buszon?</b> A lehetőség nem vonalhoz, hanem buszhoz kötött. A MÁV tájékoztatása szerint " +
-        "az <b>RVY rendszámú csuklós</b> és az <b>elektromos</b> buszokon biztosan van készülék.</p>" +
+        "az <b>RVY rendszámú csuklós (újabb csuklós Mercedes)</b> és az <b>elektromos</b> buszokon biztosan van készülék.</p>" +
         "<p>Ezeket a buszokat az alkalmazásban <b>bankkártya ikon</b> jelöli, amikor élőben látszanak: a járat " +
         "adatainál, utazás közben és az indulási listákban.</p>" +
         "<p><b>A jelölés még néhol pontatlan lehet</b>, mert a készülékkel rendelkező buszokat mi is " +
