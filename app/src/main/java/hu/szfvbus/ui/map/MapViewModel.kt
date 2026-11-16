@@ -109,6 +109,9 @@ class MapViewModel(container: AppContainer) : ViewModel() {
     private val _vehicleError = MutableStateFlow<String?>(null)
     val vehicleError = _vehicleError.asStateFlow()
 
+    /** Az élőben látszó, biztosan Pay&Go-s buszok útjai; a buszok lekérdezésével együtt frissül. */
+    val payAndGoTrips = repo.payAndGoTrips
+
     private val _selection = MutableStateFlow<Selection>(Selection.None)
     val selection = _selection.asStateFlow()
 
@@ -750,7 +753,7 @@ class MapViewModel(container: AppContainer) : ViewModel() {
     fun hideNotice(id: String) {
         closedNotices.update { it + id }
         val current = (_alerts.value + launchAlerts.value.orEmpty()).map { it.id }.toSet() +
-            LaunchNotice.LiveCoverage.id + LaunchNotice.Unofficial.id
+            LaunchNotice.LiveCoverage.id + LaunchNotice.Unofficial.id + LaunchNotice.PayAndGo.id
         viewModelScope.launch { userPrefs.hideNotice(id, current) }
     }
 

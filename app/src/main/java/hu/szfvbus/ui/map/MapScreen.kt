@@ -113,6 +113,7 @@ fun MapScreen(
     onOpenDev: () -> Unit,
     onOpenChangelog: () -> Unit,
     onLiveCoverageInfo: () -> Unit,
+    onPayAndGoInfo: () -> Unit,
     onPlanFrom: (Place) -> Unit,
     onPlanTo: (Place) -> Unit,
     onRequestLocation: () -> Unit,
@@ -289,6 +290,7 @@ fun MapScreen(
                         alerts = alerts,
                         now = now,
                         onOpenTimetable = onOpenTimetable,
+                        onPayAndGoInfo = onPayAndGoInfo,
                         onToggleSheet = toggleSheet,
                     )
                 }
@@ -690,9 +692,11 @@ private fun SheetContent(
     alerts: List<hu.szfvbus.data.model.Alert>,
     now: Long,
     onOpenTimetable: (groupName: String, routeId: String?) -> Unit,
+    onPayAndGoInfo: () -> Unit,
     onToggleSheet: () -> Unit,
 ) {
     val net = (network as? Load.Success)?.data
+    val payAndGoTrips by vm.payAndGoTrips.collectAsStateWithLifecycle()
     when (selection) {
         Selection.None -> OverviewPanel(
             network = network,
@@ -709,6 +713,7 @@ private fun SheetContent(
             departures = departures,
             isFavorite = selection.name in favoriteStops,
             favoriteDirections = favoriteDirections,
+            payAndGoTrips = payAndGoTrips,
             now = now,
             onFavorite = { vm.toggleFavoriteStop(selection.name) },
             onFavoriteDirection = vm::toggleFavoriteDirection,
@@ -725,6 +730,7 @@ private fun SheetContent(
             follow = follow,
             now = now,
             onFollow = vm::toggleFollow,
+            onPayAndGoInfo = onPayAndGoInfo,
             onStopClick = vm::selectStop,
             onLineClick = vm::selectLine,
             onClose = vm::clearSelection,
@@ -757,6 +763,7 @@ private fun SheetContent(
             canFollow = canFollowRide,
             now = now,
             onFollow = vm::toggleFollow,
+            onPayAndGoInfo = onPayAndGoInfo,
             onAlightStop = vm::setAlightStop,
             onEnd = vm::endRide,
             onRetry = vm::retrySelection,

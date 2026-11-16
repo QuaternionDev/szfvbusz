@@ -35,6 +35,7 @@ import hu.szfvbus.data.model.TimetablePattern
 import hu.szfvbus.data.model.TripDetails
 import hu.szfvbus.data.model.TripStop
 import hu.szfvbus.data.model.Vehicle
+import hu.szfvbus.data.model.hasPayAndGo
 import hu.szfvbus.util.DevClock
 import hu.szfvbus.util.LineNameComparator
 import hu.szfvbus.util.Polyline
@@ -46,6 +47,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -171,6 +175,29 @@ class TransitRepository(
         return Network(lines, stops, fetchedAt)
     }
 
+    private val _payAndGoTrips = MutableStateFlow<Set<String>>(emptySet())
+
+    /** A legutóbbi lekérdezésben látott, biztosan Pay&Go-s buszok útjai (trip azonosító szerint). */
+    val payAndGoTrips: StateFlow<Set<String>> = _payAndGoTrips.asStateFlow()
+
+    @Volatile
+    private var vehiclesFetchedAtMs = 0L
+
+    /**
+     * A Pay&Go jelöléshez frissíti a buszok listáját, ha a legutóbbi lekérdezés régebbi [maxAgeMs]-nál
+     * (pl. mert a térkép nem látszik, így az nem kérdez). Hiba esetén a régi lista marad.
+     */
+    suspend fun refreshPayAndGoTrips(maxAgeMs: Long = 20_000) {
+        if (System.currentTimeMillis() - vehiclesFetchedAtMs < maxAgeMs) return
+        try {
+            vehicles()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            // A jelölés csak kiegészítő; az indulási lista enélkül is működik.
+        }
+    }
+
     suspend fun vehicles(): List<Vehicle> {
         val data = otp.query(
             Queries.VEHICLES,
@@ -200,6 +227,9 @@ class TransitRepository(
                 nextStopName = v.stopRelationship?.stop?.name?.let(::cleanStopName),
                 stopStatus = v.stopRelationship?.status,
             )
+        }.also { list ->
+            _payAndGoTrips.value = list.filter { it.hasPayAndGo }.mapNotNullTo(HashSet()) { it.tripId }
+            vehiclesFetchedAtMs = System.currentTimeMillis()
         }
     }
 

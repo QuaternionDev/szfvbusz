@@ -232,6 +232,7 @@ fun SzfvBusAppUi(openAlertsRequests: StateFlow<Int> = MutableStateFlow(0)) {
                     onOpenDev = { overlays += Overlay.Developer },
                     onOpenChangelog = { overlays += Overlay.Changelog },
                     onLiveCoverageInfo = { openedNotice = LaunchNotice.LiveCoverage },
+                    onPayAndGoInfo = { openedNotice = LaunchNotice.PayAndGo },
                     onPlanFrom = { place ->
                         plannerVm.setFrom(Endpoint.Fixed(place))
                         tab = Tab.PLANNER

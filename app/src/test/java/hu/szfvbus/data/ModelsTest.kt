@@ -17,6 +17,7 @@ import hu.szfvbus.data.model.keepNewestVehicles
 import hu.szfvbus.data.model.directionGroups
 import hu.szfvbus.data.model.earlyLoginSuspected
 import hu.szfvbus.data.model.noticeQueue
+import hu.szfvbus.data.model.hasPayAndGo
 import hu.szfvbus.data.model.rideStatus
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -158,12 +159,12 @@ class ModelsTest {
         fun alert(id: String) = Alert(id, "Hír $id", "", null, null, null, emptyList())
         val alerts = listOf(alert("a"), alert("b"), alert("c"))
         assertEquals(
-            listOf(LaunchNotice.LiveCoverage.id, LaunchNotice.Unofficial.id, "a", "b", "c"),
+            listOf(LaunchNotice.LiveCoverage.id, LaunchNotice.Unofficial.id, LaunchNotice.PayAndGo.id, "a", "b", "c"),
             noticeQueue(alerts, hidden = emptySet(), closed = emptySet()).map { it.id },
         )
         // Az elrejtett és a most bezárt figyelmeztetés kimarad, a sorrend nem változik.
         assertEquals(
-            listOf(LaunchNotice.LiveCoverage.id, "c"),
+            listOf(LaunchNotice.LiveCoverage.id, LaunchNotice.PayAndGo.id, "c"),
             noticeQueue(alerts, setOf("a", LaunchNotice.Unofficial.id), setOf("b")).map { it.id },
         )
         // Csak a nem hivatalos alkalmazásról szóló jelenik meg egyszer.
@@ -171,9 +172,26 @@ class ModelsTest {
             listOf(LaunchNotice.Unofficial.id),
             noticeQueue(emptyList(), emptySet(), emptySet()).filter { it.showOnce }.map { it.id },
         )
-        val rest = noticeQueue(alerts, hidden = setOf(LaunchNotice.LiveCoverage.id, LaunchNotice.Unofficial.id), closed = emptySet())
+        val rest = noticeQueue(
+            alerts,
+            hidden = setOf(LaunchNotice.LiveCoverage.id, LaunchNotice.Unofficial.id, LaunchNotice.PayAndGo.id),
+            closed = emptySet(),
+        )
         assertEquals(listOf("a", "b", "c"), rest.map { it.id })
         assertEquals(alert("a"), (rest.first() as LaunchNotice.TrafficChange).alert)
+    }
+
+    @Test
+    fun payAndGoByLicensePlate() {
+        // RVY rendszámú csuklósok és az AA CM-5xx elektromos Ikarusok.
+        assertTrue(hasPayAndGo("RVY631"))
+        assertTrue(hasPayAndGo("AACM549"))
+        assertTrue(hasPayAndGo("aa cm-541"))
+        assertTrue(hasPayAndGo("RVY-669"))
+        assertFalse(hasPayAndGo("AOSY935"))
+        assertFalse(hasPayAndGo("NLF430"))
+        assertFalse(hasPayAndGo("AACM123"))
+        assertFalse(hasPayAndGo(""))
     }
 
     private fun rideTrip(): TripDetails {

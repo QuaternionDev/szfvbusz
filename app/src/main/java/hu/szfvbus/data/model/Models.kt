@@ -155,6 +155,24 @@ fun keepNewestVehicles(previous: List<Vehicle>, fresh: List<Vehicle>): List<Vehi
     }
 }
 
+/**
+ * Rendszám-előtagok, amelyeknél biztosan van Pay&Go (bankkártyás) validátor. A MÁV szerint az RVY
+ * rendszámú csuklós és az elektromos buszokon biztosan van; az elektromos Ikarus 120e-k AA CM-5xx
+ * rendszámúak. A MÁV nem közöl listát, és a menetrendi adatban sincs ilyen jelzés.
+ */
+private val PAY_AND_GO_PREFIXES = listOf("RVY", "AACM5")
+
+/** Egyenként felvett rendszámok, amelyeken szintén van validátor (pl. utasok jelzése alapján). */
+private val PAY_AND_GO_EXTRA = emptySet<String>()
+
+/** Igaz, ha a rendszám alapján a buszon biztosan lehet bankkártyával jegyet venni (Pay&Go). */
+fun hasPayAndGo(label: String): Boolean {
+    val plate = label.uppercase().filter { it.isLetterOrDigit() }
+    return plate.isNotEmpty() && (plate in PAY_AND_GO_EXTRA || PAY_AND_GO_PREFIXES.any { plate.startsWith(it) })
+}
+
+val Vehicle.hasPayAndGo: Boolean get() = isLocal && hasPayAndGo(label)
+
 data class Departure(
     val tripId: String,
     val stopId: String,

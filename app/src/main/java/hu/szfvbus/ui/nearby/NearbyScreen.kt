@@ -95,6 +95,9 @@ class NearbyViewModel(container: AppContainer) : ViewModel() {
     private val _state = MutableStateFlow<Load<List<NearbyGroup>>>(Load.Loading)
     val state = _state.asStateFlow()
 
+    /** Az élőben látszó, biztosan Pay&Go-s buszok útjai. */
+    val payAndGoTrips = repo.payAndGoTrips
+
     private val _needsPermission = MutableStateFlow(!location.hasPermission())
     val needsPermission = _needsPermission.asStateFlow()
 
@@ -138,6 +141,8 @@ class NearbyViewModel(container: AppContainer) : ViewModel() {
                     return
                 }
             val showIntercity = prefs.prefs.first().showIntercity
+            // A Pay&Go jelöléshez kellenek az élő buszok is, ha a térkép épp nem kérdezi le őket.
+            viewModelScope.launch { repo.refreshPayAndGoTrips() }
             val stops = repo.nearby(here, radiusM, includeIntercity = showIntercity)
             val net = repo.network()
             val groups = stops.groupBy { it.stop.name }.map { (name, list) ->
@@ -176,6 +181,7 @@ fun NearbyScreen(
     val needsPermission by vm.needsPermission.collectAsStateWithLifecycle()
     val radius by vm.radius.collectAsStateWithLifecycle()
     val favoriteDirections by vm.favoriteDirections.collectAsStateWithLifecycle()
+    val payAndGoTrips by vm.payAndGoTrips.collectAsStateWithLifecycle()
     val now = rememberNow()
     val lifecycleOwner = LocalLifecycleOwner.current
     LaunchedEffect(permissionVersion) {
@@ -262,6 +268,7 @@ fun NearbyScreen(
                                         onClick = { onDeparture(dep) },
                                         onBoard = { onBoard(dep) },
                                         platform = group.platformOf(dep).takeIf { direction.platforms.size > 1 },
+                                        payAndGo = dep.tripId in payAndGoTrips,
                                     )
                                 }
                             }

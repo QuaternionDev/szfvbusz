@@ -13,12 +13,23 @@ Android alkalmazás Székesfehérvár helyi buszközlekedéséhez.
 > szerint nagyjából egy hónapon belül minden busz megkapja. Addig ha egy busz nem látszik a
 > térképen, attól még közlekedhet: ilyenkor a menetrend szerinti időket mutatja az app.
 
+> [!NOTE]
+> **Elindult a Pay&GO: egyes buszokon bankkártyával is lehet jegyet venni.** 2026. november 16-tól
+> a fehérvári helyi buszok egy részén, egyelőre tesztüzemben 36 járművön bankkártyával, telefonnal
+> vagy okosórával is vehető vonaljegy. A lehetőség nem vonalhoz, hanem buszhoz kötött: a MÁV
+> tájékoztatása szerint az RVY rendszámú csuklós és az elektromos buszokon biztosan van készülék.
+> Ezeket a buszokat az alkalmazás **bankkártya ikonnal** jelöli. **A jelölés még néhol pontatlan
+> lehet**, mert a készülékkel rendelkező buszokat mi is folyamatosan vesszük fel. További
+> információ: [MÁV-csoport – Pay&GO](https://www.mavcsoport.hu/payandgo).
+
 ## Funkciók
 
 - **Élő térkép**: a térképen látszanak a helyi buszok, vonalszámmal és menetiránnyal.
   A helyzetük 5 másodpercenként frissül, a buszok két frissítés között simán mozognak.
 - **Buszok**: egy buszra koppintva látszik a helyzete, rendszáma, a késése és hogy akadálymentes-e,
   valamint a járat összes megállója a várható érkezési időkkel. A kamera követheti a buszt.
+- **Pay&GO jelölés**: bankkártya ikon jelöli azokat az élőben látszó buszokat, amelyeken
+  bankkártyával is lehet jegyet venni: a járat adatainál, utazás közben és az indulási listákban.
 - **Útvonaltervező**: két pont között tervez buszos útvonalat; a kiindulópont és a cél lehet
   megálló, cím vagy a saját helyzeted. Választható, hogy minél kevesebb gyaloglással
   (alapértelmezett) vagy a leggyorsabban érj oda.

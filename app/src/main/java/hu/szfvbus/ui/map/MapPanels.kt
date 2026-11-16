@@ -71,6 +71,7 @@ import hu.szfvbus.data.model.StopGroup
 import hu.szfvbus.data.model.TripDetails
 import hu.szfvbus.data.model.Vehicle
 import hu.szfvbus.data.model.directionGroups
+import hu.szfvbus.data.model.hasPayAndGo
 import hu.szfvbus.ui.common.DepartureRow
 import hu.szfvbus.ui.common.DirectionHeader
 import hu.szfvbus.ui.common.EmptyBox
@@ -78,6 +79,7 @@ import hu.szfvbus.ui.common.ErrorBox
 import hu.szfvbus.ui.common.LineBadge
 import hu.szfvbus.ui.common.Load
 import hu.szfvbus.ui.common.LoadingBox
+import hu.szfvbus.ui.common.PayAndGoChip
 import hu.szfvbus.ui.common.RealtimeDot
 import hu.szfvbus.ui.common.lineColorOf
 import hu.szfvbus.ui.theme.LocalTransitColors
@@ -243,6 +245,8 @@ fun StopPanel(
     isFavorite: Boolean,
     /** A kedvenc irányok peronjai (lásd [StopGroup.sameDirection]). */
     favoriteDirections: Set<String>,
+    /** Az élőben látszó, biztosan Pay&Go-s buszok útjai. */
+    payAndGoTrips: Set<String>,
     now: Long,
     onFavorite: () -> Unit,
     onFavoriteDirection: (stopIds: List<String>) -> Unit,
@@ -309,6 +313,7 @@ fun StopPanel(
                             onBoard = { onBoard(dep) },
                             // Ha egy irányba több kocsiállásról is indul busz, mindegyik mutatja a sajátját.
                             platform = stops[dep.stopId]?.platformLabel?.takeIf { direction.platforms.size > 1 },
+                            payAndGo = dep.tripId in payAndGoTrips,
                         )
                     }
                     val hidden = direction.departures.size - DEPARTURES_PER_DIRECTION
@@ -336,6 +341,7 @@ fun TripPanel(
     follow: Boolean,
     now: Long,
     onFollow: () -> Unit,
+    onPayAndGoInfo: () -> Unit,
     onStopClick: (stopId: String) -> Unit,
     onLineClick: (routeId: String) -> Unit,
     onClose: () -> Unit,
@@ -388,12 +394,15 @@ fun TripPanel(
                 },
                 onClose = onClose,
             )
-            if (details != null && (details.wheelchair || vehicle == null)) {
+            val wheelchair = details?.wheelchair == true
+            val notLive = details != null && vehicle == null
+            val payAndGo = vehicle?.hasPayAndGo == true
+            if (wheelchair || notLive || payAndGo) {
                 Row(
                     Modifier.padding(horizontal = 16.dp, vertical = 2.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    if (details.wheelchair) {
+                    if (wheelchair) {
                         Icon(
                             Icons.AutoMirrored.Filled.Accessible,
                             contentDescription = "Akadálymentes",
@@ -402,7 +411,8 @@ fun TripPanel(
                         )
                         Spacer(Modifier.width(8.dp))
                     }
-                    if (vehicle == null) {
+                    if (payAndGo) PayAndGoChip(onPayAndGoInfo)
+                    if (notLive) {
                         Text(
                             "Ez a busz most nem követhető élőben",
                             style = MaterialTheme.typography.bodySmall,

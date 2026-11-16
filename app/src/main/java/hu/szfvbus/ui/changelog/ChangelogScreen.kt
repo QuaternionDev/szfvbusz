@@ -55,6 +55,11 @@ val RELEASES = listOf(
         "0.6.0",
         listOf(
             new(
+                "Pay&GO: bankkártya ikon jelöli azokat a buszokat, amelyeken bankkártyával, telefonnal vagy " +
+                    "okosórával is vehetsz jegyet (a járat adatainál, utazás közben és az indulási listákban). " +
+                    "Az indításkor megjelenő tájékoztató elmondja a részleteket. A jelölés még néhol pontatlan lehet.",
+            ),
+            new(
                 "Navigáció felszállás után (BÉTA): amíg a buszra vársz, a térkép a buszt követi, felszállás után " +
                     "pedig a saját helyzetedet, navigációs nézetben, a busz útvonalára igazítva. Még kísérleti, " +
                     "ezért BÉTA jelvény jelzi.",

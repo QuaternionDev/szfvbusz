@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.PriorityHigh
 import androidx.compose.material.icons.filled.Warning
@@ -82,6 +83,27 @@ private const val OBU_ARTICLE_URL =
 const val CONTACT_EMAIL = "szfvbuszapp@quaternion.hu"
 
 const val UNOFFICIAL_TITLE = "Nem hivatalos alkalmazás"
+
+private const val PAY_AND_GO_TITLE = "Bankkártyával is fizethetsz a buszon"
+
+private const val PAY_AND_GO_BODY =
+    "<p>2026. november 16-tól a fehérvári helyi buszok egy részén, egyelőre tesztüzemben <b>36 járművön</b> " +
+        "<b>bankkártyával, telefonnal vagy okosórával</b> is vehetsz vonaljegyet (Pay&amp;GO): csak érintsd " +
+        "a kártyát a buszon lévő készülékhez. Nem kell regisztrálni, sem alkalmazást letölteni.</p>" +
+        "<p><b>Melyik buszon?</b> A lehetőség nem vonalhoz, hanem buszhoz kötött. A MÁV tájékoztatása szerint " +
+        "az <b>RVY rendszámú csuklós</b> és az <b>elektromos</b> buszokon biztosan van készülék.</p>" +
+        "<p>Ezeket a buszokat az alkalmazásban <b>bankkártya ikon</b> jelöli, amikor élőben látszanak: a járat " +
+        "adatainál, utazás közben és az indulási listákban.</p>" +
+        "<p><b>A jelölés még néhol pontatlan lehet</b>, mert a készülékkel rendelkező buszokat mi is " +
+        "folyamatosan vesszük fel. Ha egy buszon nincs ikon, attól még lehet rajta készülék. Ha eltérést " +
+        "látsz, írj a <b>$CONTACT_EMAIL</b> címre.</p>" +
+        "<p>Jó tudni: a jegy ugyanannyiba kerül, mint a buszvezetőnél, egy érintéssel legfeljebb két jegyet " +
+        "vehetsz, és csak Mastercard vagy Visa kártyával lehet fizetni. A jegy csak arra a buszra érvényes, " +
+        "átszállni nem lehet vele. Ellenőrzéskor azt a kártyát, telefont vagy órát kell felmutatnod, " +
+        "amellyel fizettél.</p>"
+
+/** A MÁV-csoport Pay&GO tájékoztató oldala. */
+private const val PAY_AND_GO_URL = "https://www.mavcsoport.hu/payandgo"
 
 private const val UNOFFICIAL_BODY =
     "<p>Az SzfvBusz <b>független projekt</b>: nem a MÁV-csoport vagy a Volánbusz terméke, és nem áll " +
@@ -159,6 +181,18 @@ fun LaunchNoticeDialog(
             details = emptyList()
             url = "mailto:$CONTACT_EMAIL"
             linkText = "E-mail írása"
+        }
+        LaunchNotice.PayAndGo -> {
+            icon = Icons.Default.CreditCard
+            accent = MaterialTheme.colorScheme.primary
+            iconBackground = accent
+            iconTint = MaterialTheme.colorScheme.onPrimary
+            kicker = "ÚJ: PAY&GO"
+            title = PAY_AND_GO_TITLE
+            body = PAY_AND_GO_BODY
+            details = emptyList()
+            url = PAY_AND_GO_URL
+            linkText = "Részletek a MÁV-csoport oldalán"
         }
         is LaunchNotice.TrafficChange -> {
             val alert = notice.alert

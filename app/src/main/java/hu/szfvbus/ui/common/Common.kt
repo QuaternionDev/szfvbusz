@@ -25,6 +25,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.CloudOff
+import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.DirectionsBus
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
@@ -158,6 +159,8 @@ fun DepartureRow(
     onBoard: (() -> Unit)? = null,
     /** "12. kocsiállás", ha a busz egy állomás számozott kocsiállásáról indul. */
     platform: String? = null,
+    /** Az indulást teljesítő, már élőben látszó buszon biztosan van Pay&Go. */
+    payAndGo: Boolean = false,
 ) {
     Row(
         modifier
@@ -169,12 +172,16 @@ fun DepartureRow(
         LineBadge(departure.line, lineColorOf(departure.line, departure.isLocal))
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
-            Text(
-                departure.headsign,
-                style = MaterialTheme.typography.bodyLarge,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    departure.headsign,
+                    style = MaterialTheme.typography.bodyLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false),
+                )
+                if (payAndGo) PayAndGoMark(Modifier.padding(start = 6.dp))
+            }
             if (showStopHint != null) {
                 Text(
                     showStopHint,
@@ -361,6 +368,40 @@ fun BetaBadge(
             .background(container)
             .padding(horizontal = 7.dp, vertical = 2.dp),
     )
+}
+
+const val PAY_AND_GO_DESCRIPTION = "Bankkártyával is fizethetsz (Pay&Go)"
+
+/** Kis bankkártya ikon az indulási sorokban: a buszon biztosan lehet bankkártyával jegyet venni. */
+@Composable
+fun PayAndGoMark(modifier: Modifier = Modifier) {
+    Icon(
+        Icons.Default.CreditCard,
+        contentDescription = PAY_AND_GO_DESCRIPTION,
+        tint = MaterialTheme.colorScheme.primary,
+        modifier = modifier.size(16.dp),
+    )
+}
+
+/** Koppintható „Bankkártyával is fizethetsz” címke a járat adatainál; a Pay&Go tájékoztatót nyitja meg. */
+@Composable
+fun PayAndGoChip(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(50),
+        color = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        modifier = modifier,
+    ) {
+        Row(
+            Modifier.padding(start = 8.dp, end = 10.dp, top = 3.dp, bottom = 3.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(Icons.Default.CreditCard, contentDescription = null, modifier = Modifier.size(16.dp))
+            Spacer(Modifier.width(6.dp))
+            Text(PAY_AND_GO_DESCRIPTION, style = MaterialTheme.typography.labelMedium, maxLines = 1)
+        }
+    }
 }
 
 @Composable

@@ -82,6 +82,9 @@ class FavoritesViewModel(container: AppContainer) : ViewModel() {
     private val _stops = MutableStateFlow<List<FavoriteStop>>(emptyList())
     val stops = _stops.asStateFlow()
 
+    /** Az élőben látszó, biztosan Pay&Go-s buszok útjai. */
+    val payAndGoTrips = repo.payAndGoTrips
+
     suspend fun refreshLoop() {
         userPrefs.prefs.collectLatest { p ->
             val names = p.favoriteStops.sorted()
@@ -98,6 +101,8 @@ class FavoritesViewModel(container: AppContainer) : ViewModel() {
     }
 
     private suspend fun refresh(names: List<String>, directionIds: Set<String>, showIntercity: Boolean) = coroutineScope {
+        // A Pay&Go jelöléshez kellenek az élő buszok is, ha a térkép épp nem kérdezi le őket.
+        launch { repo.refreshPayAndGoTrips() }
         val net = try {
             repo.network()
         } catch (e: CancellationException) {
@@ -181,6 +186,7 @@ fun FavoritesScreen(
     val vm: FavoritesViewModel = viewModel(factory = appViewModelFactory { FavoritesViewModel(it) })
     val prefs by vm.prefs.collectAsStateWithLifecycle()
     val stops by vm.stops.collectAsStateWithLifecycle()
+    val payAndGoTrips by vm.payAndGoTrips.collectAsStateWithLifecycle()
     val now = rememberNow()
     val lifecycleOwner = LocalLifecycleOwner.current
     LaunchedEffect(Unit) {
@@ -211,6 +217,7 @@ fun FavoritesScreen(
                     FavoriteDirectionCard(
                         fav,
                         now,
+                        payAndGoTrips,
                         onStopGroup = onStopGroup,
                         onDeparture = onDeparture,
                         onBoard = onBoard,
@@ -265,6 +272,7 @@ fun FavoritesScreen(
                                         onClick = { onDeparture(dep) },
                                         onBoard = { onBoard(dep) },
                                         platform = fav.platforms[dep.stopId].takeIf { direction.platforms.size > 1 },
+                                        payAndGo = dep.tripId in payAndGoTrips,
                                     )
                                 }
                             }
@@ -292,6 +300,7 @@ fun FavoritesScreen(
 private fun FavoriteDirectionCard(
     fav: FavoriteStop,
     now: Long,
+    payAndGoTrips: Set<String>,
     onStopGroup: (name: String, stopId: String?) -> Unit,
     onDeparture: (Departure) -> Unit,
     onBoard: (Departure) -> Unit,
@@ -346,6 +355,7 @@ private fun FavoriteDirectionCard(
                             onClick = { onDeparture(dep) },
                             onBoard = { onBoard(dep) },
                             platform = fav.platforms[dep.stopId].takeIf { direction.platforms.size > 1 },
+                            payAndGo = dep.tripId in payAndGoTrips,
                         )
                     }
                 }

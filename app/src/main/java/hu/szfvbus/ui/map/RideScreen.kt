@@ -55,6 +55,7 @@ import hu.szfvbus.data.model.RidePhase
 import hu.szfvbus.data.model.RideStatus
 import hu.szfvbus.data.model.TripDetails
 import hu.szfvbus.data.model.Vehicle
+import hu.szfvbus.data.model.hasPayAndGo
 import hu.szfvbus.ui.common.AlertBanner
 import hu.szfvbus.ui.common.BetaBadge
 import hu.szfvbus.ui.common.EarlyLoginWarning
@@ -62,6 +63,7 @@ import hu.szfvbus.ui.common.LineBadge
 import hu.szfvbus.ui.common.forLine
 import hu.szfvbus.ui.common.Load
 import hu.szfvbus.ui.common.LoadingBox
+import hu.szfvbus.ui.common.PayAndGoChip
 import hu.szfvbus.ui.common.ErrorBox
 import hu.szfvbus.ui.common.lineColorOf
 import hu.szfvbus.util.TimeUtil
@@ -236,6 +238,7 @@ fun RidePanel(
     canFollow: Boolean,
     now: Long,
     onFollow: () -> Unit,
+    onPayAndGoInfo: () -> Unit,
     onAlightStop: (stopId: String) -> Unit,
     onEnd: () -> Unit,
     onRetry: () -> Unit,
@@ -280,6 +283,9 @@ fun RidePanel(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
                     )
+                    if (vehicle?.hasPayAndGo == true) {
+                        PayAndGoChip(onPayAndGoInfo, Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp))
+                    }
                     if (details?.earlyLoginSuspected == true) {
                         EarlyLoginWarning(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp))
                     }
