@@ -52,6 +52,29 @@ private fun fixed(text: String) = Change(ChangeKind.FIXED, text)
 /** Az eddigi összes verzió, a legújabb elöl. Az első mindig az éppen készülő verzió. */
 val RELEASES = listOf(
     Release(
+        "0.6.0",
+        listOf(
+            new(
+                "Navigáció felszállás után (BÉTA): amíg a buszra vársz, a térkép a buszt követi, felszállás után " +
+                    "pedig a saját helyzetedet, navigációs nézetben, a busz útvonalára igazítva. Még kísérleti, " +
+                    "ezért BÉTA jelvény jelzi.",
+            ),
+            improved(
+                "Megújult utazási nézet: alul navigációs sáv az érkezési idővel, a hátralévő idővel és " +
+                    "megállószámmal, a követés és a „Leszállok” gombbal. Felhúzva a járat adatai és a hátralévő " +
+                    "megállók látszanak.",
+            ),
+            new(
+                "Figyelmeztetés a gyanúsan korai élő adatnál: ha egy busz 15 percnél többel a menetrend előtt " +
+                    "jár, valószínűleg még el sem indult, ezért a menetrend szerinti idő a fő.",
+            ),
+            fixed(
+                "A buszok élő követés közben nem ugranak vissza: a szerver néha régebbi helyzeteket küld, " +
+                    "ezeket most kihagyja.",
+            ),
+        ),
+    ),
+    Release(
         "0.5.2",
         listOf(
             new(
