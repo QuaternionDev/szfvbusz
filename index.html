@@ -21,6 +21,7 @@
     --faint: #4f6283;
     --accent: #8cc4ff;
     --accent-strong: #5aa8ff;
+    --bezel: #04070d;
   }
   * { box-sizing: border-box; }
   body {
@@ -33,10 +34,28 @@
     flex-direction: column;
     align-items: center;
     padding: 48px 16px;
+    overflow-x: hidden;
   }
-  main { width: 100%; max-width: 440px; }
+  html { scroll-behavior: smooth; }
+  main { width: 100%; max-width: 440px; margin-top: 88px; scroll-margin-top: 32px; }
   h1, h2 { font-family: "Lexend", "Figtree", sans-serif; margin: 0; }
-  .hero { text-align: center; margin-bottom: 28px; }
+  .hero { width: 100%; max-width: 440px; text-align: center; }
+
+  /* Felső gomb, ami az oldal alján lévő letöltésekhez ugrik. */
+  .cta { margin-top: 28px; }
+  .download-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 14px 28px; border-radius: 999px;
+    background: var(--accent-strong); color: #04101f;
+    font-family: "Lexend", "Figtree", sans-serif; font-size: 18px; font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 10px 30px -10px rgba(90, 168, 255, .7);
+    transition: background .15s, transform .15s;
+  }
+  .download-btn svg { width: 22px; height: 22px; fill: currentColor; }
+  .download-btn:hover { background: var(--accent); transform: translateY(-1px); }
+  .download-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .cta-note { color: var(--faint); font-size: 10px; margin: 10px 0 0; }
   .hero .logo { font-size: 56px; line-height: 1; }
   .hero h1 { font-size: 34px; margin-top: 12px; color: var(--accent); }
   .hero p { color: var(--muted); font-size: 17px; line-height: 1.5; margin: 12px 0 0; }
@@ -74,35 +93,195 @@
   a.chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .hint { color: var(--muted); font-size: 13px; margin: 10px 0 0; line-height: 1.45; }
   .hint b { color: #ffc107; }
+
+  /* Funkciók képernyőképekkel: felváltva balra és jobbra, mobilon egymás alatt. */
+  .features { width: 100%; max-width: 900px; margin-top: 72px; }
+  .features > h2 { text-align: center; font-size: 28px; }
+  .features > .lead { text-align: center; color: var(--muted); font-size: 16px; margin: 10px 0 0; }
+  .feature {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 56px;
+    margin-top: 72px;
+  }
+  .feature:nth-of-type(even) .shot { order: 2; }
+  .feature .text h3 {
+    font-family: "Lexend", "Figtree", sans-serif;
+    font-size: 24px; margin: 10px 0 0; line-height: 1.25;
+  }
+  .feature .text p { color: var(--muted); font-size: 16px; line-height: 1.6; margin: 12px 0 0; }
+  .feature .text p b { color: var(--text); font-weight: 600; }
+  .kicker {
+    display: inline-flex; align-items: center; gap: 8px;
+    color: var(--accent); font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  }
+  .tag {
+    padding: 2px 8px; border-radius: 999px; font-size: 11px; letter-spacing: .06em;
+    background: #3a2c00; color: #ffc107;
+  }
+  .tag.new { background: #12351f; color: #7fdc9a; }
+
+  .shot { display: flex; justify-content: center; perspective: 1400px; }
+  .phone {
+    position: relative;
+    width: min(280px, 72vw);
+    padding: 28px 9px 12px;
+    border-radius: 42px;
+    background: linear-gradient(145deg, #1c2a42, var(--bezel) 40%);
+    box-shadow:
+      0 0 0 1px #2a3b5c,
+      0 30px 60px -20px rgba(0, 0, 0, .7),
+      0 0 80px -10px var(--glow, rgba(90, 168, 255, .35));
+    transform: rotateY(var(--tilt, -10deg)) rotateX(4deg);
+    transition: transform .5s ease;
+  }
+  .feature:nth-of-type(even) .phone { --tilt: 10deg; }
+  .phone:hover { transform: rotateY(0) rotateX(0); }
+  .phone::before {
+    /* Hangszóró és kamera a felső peremen, hogy ne takarja a képet. */
+    content: ""; position: absolute;
+    top: 12px; left: 50%; width: 56px; height: 5px; margin-left: -28px;
+    border-radius: 999px; background: #22324f;
+  }
+  .phone::after {
+    content: ""; position: absolute;
+    top: 10px; left: 50%; width: 9px; height: 9px; margin-left: 38px;
+    border-radius: 50%; background: #22324f;
+  }
+  .phone img {
+    display: block; width: 100%; height: auto;
+    aspect-ratio: 640 / 1305;
+    border-radius: 20px;
+    background: #1a2233;
+  }
+  .phone.purple { --glow: rgba(200, 120, 230, .35); }
+
+  /* Görgetéskor finoman beúsznak; ha a böngésző mozgáscsökkentést kér, nincs animáció. */
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity .7s ease, transform .7s ease; }
+  .reveal.visible { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .reveal { opacity: 1; transform: none; transition: none; }
+    .phone, .phone:hover { transform: none; transition: none; }
+  }
+
+  @media (max-width: 720px) {
+    .features { margin-top: 56px; }
+    .feature { grid-template-columns: 1fr; gap: 28px; margin-top: 56px; text-align: center; }
+    .feature:nth-of-type(even) .shot { order: 0; }
+    .phone, .feature:nth-of-type(even) .phone { --tilt: 0deg; transform: none; }
+  }
+
   footer {
-    max-width: 440px; margin-top: 28px;
+    max-width: 440px; margin-top: 72px;
     color: var(--faint); font-size: 13px; line-height: 1.5; text-align: center;
   }
   footer a { color: var(--muted); }
 </style>
 </head>
 <body>
-<main>
-  <div class="hero">
-    <div class="logo">🚌</div>
-    <h1>SzfvBusz</h1>
-    <p>Android alkalmazás Székesfehérvár helyi buszközlekedéséhez: térkép, indulások, menetrendek és útvonaltervezés.</p>
-    <p>Még dolgozunk rajta, de az app már kint van. <strong>Teszteld velünk te is!</strong></p>
-    <span class="badge">FEJLESZTÉS ALATT</span>
-  </div>
 
+<header class="hero">
+  <div class="logo">🚌</div>
+  <h1>SzfvBusz</h1>
+  <p>Android alkalmazás Székesfehérvár helyi buszközlekedéséhez: térkép, indulások, menetrendek és útvonaltervezés.</p>
+  <p>Még dolgozunk rajta, de az app már kint van. <strong>Teszteld velünk te is!</strong></p>
+  <span class="badge">FEJLESZTÉS ALATT</span>
+  <div class="cta">
+    <a class="download-btn" href="#download">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a1 1 0 0 1 1 1v9.59l3.3-3.3a1 1 0 1 1 1.4 1.42l-5 5a1 1 0 0 1-1.4 0l-5-5a1 1 0 1 1 1.4-1.42l3.3 3.3V4a1 1 0 0 1 1-1zM5 20a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H6a1 1 0 0 1-1-1z"/></svg>
+      Letöltés
+    </a>
+    <p class="cta-note">Csak Androidra (8.0 vagy újabb) · ingyenes · <span data-version>v0.6.0</span></p>
+  </div>
+</header>
+
+<section class="features" aria-labelledby="features-title">
+  <h2 id="features-title" class="reveal">Mit tud az app?</h2>
+  <p class="lead reveal">Képek a v0.6.0-ból.</p>
+
+  <article class="feature reveal">
+    <div class="shot">
+      <div class="phone">
+        <img src="screenshots/map.jpg" width="640" height="1305" loading="lazy"
+             alt="Székesfehérvár térképe az élőben látszó helyi buszokkal, mindegyiken a vonalszám">
+      </div>
+    </div>
+    <div class="text">
+      <span class="kicker">Élő térkép</span>
+      <h3>Lásd, hol jár a busz</h3>
+      <p>A helyi buszok élőben a térképen, <b>vonalszámmal és menetiránnyal</b>. A helyzetük
+        5 másodpercenként frissül, a buszok két frissítés között is simán haladnak.</p>
+      <p>Egy buszra koppintva látszik a késése, a rendszáma és a hátralévő megállói.</p>
+    </div>
+  </article>
+
+  <article class="feature reveal">
+    <div class="shot">
+      <div class="phone">
+        <img src="screenshots/nearby.jpg" width="640" height="1305" loading="lazy"
+             alt="A Közelben fül: az Autóbusz-állomás indulásai irányonként, kocsiállással, bankkártya ikonokkal és Felszállok gombokkal">
+      </div>
+    </div>
+    <div class="text">
+      <span class="kicker">Közelben <span class="tag new">Pay&amp;GO</span></span>
+      <h3>Indulások a közeli megállókból</h3>
+      <p>A környék megállóinak következő buszai <b>irányonként</b>, az állomásokon a
+        <b>kocsiállás</b> számával. Az élő időt zölddel, a menetrendit mellette áthúzva mutatja.</p>
+      <p>A <b>bankkártya ikon</b> jelzi azokat a buszokat, amelyeken bankkártyával is vehetsz
+        jegyet (Pay&amp;GO). A jelölés még néhol pontatlan lehet.</p>
+    </div>
+  </article>
+
+  <article class="feature reveal">
+    <div class="shot">
+      <div class="phone">
+        <img src="screenshots/ride.jpg" width="640" height="1305" loading="lazy"
+             alt="Utazási nézet: felül a felszállási megálló és az érkezésig hátralévő idő, alul az érkezés ideje és a Leszállok gomb">
+      </div>
+    </div>
+    <div class="text">
+      <span class="kicker">Felszállok <span class="tag">BÉTA</span></span>
+      <h3>Navigáció a buszon</h3>
+      <p>A <b>Felszállok</b> gombbal az app végigkísér: amíg vársz, a buszt követi, felszállás
+        után pedig a saját helyzetedet, navigációs nézetben.</p>
+      <p>Mutatja az érkezés idejét és a hátralévő megállókat, és <b>rezgéssel szól</b>, mielőtt
+        le kell szállnod.</p>
+    </div>
+  </article>
+
+  <article class="feature reveal">
+    <div class="shot">
+      <div class="phone purple">
+        <img src="screenshots/bus-dark.jpg" width="640" height="1305" loading="lazy"
+             alt="Egy 14-es busz adatai sötét módban, BudapestGO színvilággal, a Bankkártyával is fizethetsz címkével">
+      </div>
+    </div>
+    <div class="text">
+      <span class="kicker">Téma <span class="tag new">ÚJ</span></span>
+      <h3>Világos, sötét, kék vagy lila</h3>
+      <p>Az app követheti a telefon beállítását, vagy választhatsz <b>világos és sötét</b> mód
+        között. A színvilág is állítható: az alapértelmezett kék mellett <b>BudapestGO-lila</b> is
+        van.</p>
+      <p>A forgalmi változásokról és terelésekről az érintett vonalaknál sárga sáv szól.</p>
+    </div>
+  </article>
+</section>
+
+<main id="download">
   <section class="card">
-    <h2>Alkalmazás</h2>
-    <div class="version" id="version">v0.5.0</div>
+    <h2>Letöltés</h2>
+    <div class="version" id="version">v0.6.0</div>
 
     <div class="section">
       <h3>Android</h3>
       <div class="chips">
-        <a class="chip" id="apk-arm64" href="https://github.com/QuaternionDev/szfvbusz/releases/download/v0.5.0/SzfvBusz-v0.5.0-arm64.apk">
+        <a class="chip" id="apk-arm64" href="https://github.com/QuaternionDev/szfvbusz/releases/download/v0.6.0/SzfvBusz-v0.6.0-arm64.apk">
           <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 7V3.5L18.5 9H13z"/></svg>
           arm64.apk
         </a>
-        <a class="chip" id="apk-universal" href="https://github.com/QuaternionDev/szfvbusz/releases/download/v0.5.0/SzfvBusz-v0.5.0-universal.apk">
+        <a class="chip" id="apk-universal" href="https://github.com/QuaternionDev/szfvbusz/releases/download/v0.6.0/SzfvBusz-v0.6.0-universal.apk">
           <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 7V3.5L18.5 9H13z"/></svg>
           universal.apk
         </a>
@@ -125,21 +304,36 @@
 
 <footer>
   Nem hivatalos alkalmazás: nem a MÁV-csoport vagy a Volánbusz terméke, és nem áll kapcsolatban velük.<br>
-  Hibajelzés, kérdés: <a href="mailto:szfvbuszapp@quaternion.hu">szfvbuszapp@quaternion.hu</a>
+  Hibajelzés, kérdés: <a href="mailto:szfvbuszapp@quaternion.hu">szfvbuszapp@quaternion.hu</a><br>
+  Térkép a képeken: <a href="https://openfreemap.org">OpenFreeMap</a>, © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> közreműködők
 </footer>
 
 <script>
-  // A legfrissebb kiadás verziója és APK-i a GitHubról; hiba esetén a fenti v0.5.0 marad.
+  // A legfrissebb kiadás verziója és APK-i a GitHubról; hiba esetén a fenti v0.6.0 marad.
   fetch("https://api.github.com/repos/QuaternionDev/szfvbusz/releases/latest")
     .then(r => r.ok ? r.json() : Promise.reject())
     .then(rel => {
-      if (rel.tag_name) document.getElementById("version").textContent = rel.tag_name;
+      if (rel.tag_name) {
+        document.getElementById("version").textContent = rel.tag_name;
+        document.querySelectorAll("[data-version]").forEach(el => el.textContent = rel.tag_name);
+      }
       for (const asset of rel.assets || []) {
         if (/arm64/.test(asset.name)) document.getElementById("apk-arm64").href = asset.browser_download_url;
         if (/universal/.test(asset.name)) document.getElementById("apk-universal").href = asset.browser_download_url;
       }
     })
     .catch(() => {});
+
+  // A funkciók görgetéskor úsznak be; régi böngészőben azonnal látszanak.
+  const reveals = document.querySelectorAll(".reveal");
+  if ("IntersectionObserver" in window) {
+    const io = new IntersectionObserver(entries => {
+      for (const e of entries) if (e.isIntersecting) { e.target.classList.add("visible"); io.unobserve(e.target); }
+    }, { threshold: 0.15 });
+    reveals.forEach(el => io.observe(el));
+  } else {
+    reveals.forEach(el => el.classList.add("visible"));
+  }
 </script>
 </body>
 </html>
