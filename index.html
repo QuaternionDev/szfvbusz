@@ -41,7 +41,7 @@
   h1, h2 { font-family: "Lexend", "Figtree", sans-serif; margin: 0; }
   .hero { width: 100%; max-width: 440px; text-align: center; }
 
-  /* Felső gomb, ami az oldal alján lévő letöltésekhez ugrik. */
+  /* Letöltés gomb: felül az oldal aljára ugrik, alul az APK-t tölti le. */
   .cta { margin-top: 28px; }
   .download-btn {
     display: inline-flex; align-items: center; gap: 10px;
@@ -92,7 +92,6 @@
   a.chip:hover { background: var(--chip-hover); border-color: var(--border); }
   a.chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .hint { color: var(--muted); font-size: 13px; margin: 10px 0 0; line-height: 1.45; }
-  .hint b { color: #ffc107; }
 
   /* Funkciók képernyőképekkel: felváltva balra és jobbra, mobilon egymás alatt. */
   .features { width: 100%; max-width: 900px; margin-top: 72px; }
@@ -275,19 +274,11 @@
     <div class="version" id="version">v0.6.0</div>
 
     <div class="section">
-      <h3>Android</h3>
-      <div class="chips">
-        <a class="chip" id="apk-arm64" href="https://github.com/QuaternionDev/szfvbusz/releases/download/v0.6.0/SzfvBusz-v0.6.0-arm64.apk">
-          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 7V3.5L18.5 9H13z"/></svg>
-          arm64.apk
-        </a>
-        <a class="chip" id="apk-universal" href="https://github.com/QuaternionDev/szfvbusz/releases/download/v0.6.0/SzfvBusz-v0.6.0-universal.apk">
-          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 7V3.5L18.5 9H13z"/></svg>
-          universal.apk
-        </a>
-      </div>
-      <p class="hint">Ez még tesztverzió, hibák előfordulhatnak. A legtöbb telefonhoz az <b>arm64</b> kell;
-        ha nem tudod, melyik a tiéd, a <b>universal</b> mindenhol fut.</p>
+      <a class="download-btn" id="apk-universal" href="https://github.com/QuaternionDev/szfvbusz/releases/download/v0.6.0/SzfvBusz-v0.6.0-universal.apk">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a1 1 0 0 1 1 1v9.59l3.3-3.3a1 1 0 1 1 1.4 1.42l-5 5a1 1 0 0 1-1.4 0l-5-5a1 1 0 1 1 1.4-1.42l3.3 3.3V4a1 1 0 0 1 1-1zM5 20a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H6a1 1 0 0 1-1-1z"/></svg>
+        Android letöltés
+      </a>
+      <p class="hint">Ez még tesztverzió, hibák előfordulhatnak.</p>
     </div>
 
     <div class="section">
@@ -309,7 +300,7 @@
 </footer>
 
 <script>
-  // A legfrissebb kiadás verziója és APK-i a GitHubról; hiba esetén a fenti v0.6.0 marad.
+  // A legfrissebb kiadás verziója és universal APK-ja a GitHubról; hiba esetén a fenti v0.6.0 marad.
   fetch("https://api.github.com/repos/QuaternionDev/szfvbusz/releases/latest")
     .then(r => r.ok ? r.json() : Promise.reject())
     .then(rel => {
@@ -317,10 +308,8 @@
         document.getElementById("version").textContent = rel.tag_name;
         document.querySelectorAll("[data-version]").forEach(el => el.textContent = rel.tag_name);
       }
-      for (const asset of rel.assets || []) {
-        if (/arm64/.test(asset.name)) document.getElementById("apk-arm64").href = asset.browser_download_url;
-        if (/universal/.test(asset.name)) document.getElementById("apk-universal").href = asset.browser_download_url;
-      }
+      const apk = (rel.assets || []).find(asset => /universal/.test(asset.name));
+      if (apk) document.getElementById("apk-universal").href = apk.browser_download_url;
     })
     .catch(() => {});
 
